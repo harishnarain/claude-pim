@@ -1,3 +1,6 @@
+# SQLite database files
+db/pim.db
+
 # Logs
 logs
 *.log

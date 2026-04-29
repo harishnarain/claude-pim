@@ -1,0 +1,23 @@
+{
+  "name": "claude-pim",
+  "version": "1.0.0",
+  "description": "Personal Information Manager — monorepo root",
+  "type": "module",
+  "scripts": {
+    "dev:server": "node --watch server/index.js",
+    "dev:client": "npm --prefix client run dev",
+    "test": "vitest run --reporter=verbose",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.9"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.9.0",
+    "express": "^5.2.1"
+  },
+  "vitest": {
+    "include": ["tests/unit/**/*.test.js"],
+    "environment": "node"
+  }
+}
