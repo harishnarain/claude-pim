@@ -5,7 +5,7 @@
  */
 
 import express from 'express';
-import { getDb } from './db.js';
+import { getDb, runMigrations } from './db.js';
 import logger from './logger.js';
 
 const PORT = process.env.PORT ?? 3001;
@@ -27,8 +27,9 @@ app.get('/api/health', (_req, res) => {
  * @returns {import('http').Server} The running HTTP server instance.
  */
 function start() {
-  // Initialise DB connection eagerly on startup.
-  getDb();
+  // Initialise DB connection eagerly on startup and apply pending migrations.
+  const db = getDb();
+  runMigrations(db);
 
   const server = app.listen(PORT, () => {
     logger.info(`PIM server listening on port ${PORT}`);
