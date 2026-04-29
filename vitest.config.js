@@ -12,6 +12,8 @@ export default defineConfig({
     alias: {
       react: '/Users/harish/repos/claude-pim/node_modules/react',
       'react-dom': '/Users/harish/repos/claude-pim/node_modules/react-dom',
+      'react-router-dom': '/Users/harish/repos/claude-pim/client/node_modules/react-router-dom',
+      'react-router': '/Users/harish/repos/claude-pim/client/node_modules/react-router',
     },
   },
   test: {
