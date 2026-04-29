@@ -7,12 +7,16 @@
 import express from 'express';
 import { getDb, runMigrations } from './db.js';
 import logger from './logger.js';
+import contactsRouter from './routes/contacts.js';
 
 const PORT = process.env.PORT ?? 3001;
 
 const app = express();
 
 app.use(express.json());
+
+// Contacts REST API routes.
+app.use('/api/contacts', contactsRouter);
 
 // Health-check endpoint — verifies server and DB are reachable.
 app.get('/api/health', (_req, res) => {
