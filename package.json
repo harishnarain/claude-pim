@@ -10,6 +10,11 @@
     "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@vitejs/plugin-react": "^6.0.1",
+    "jsdom": "^29.1.0",
     "vitest": "^2.1.9"
   },
   "dependencies": {
@@ -17,7 +22,14 @@
     "express": "^5.2.1"
   },
   "vitest": {
-    "include": ["tests/unit/**/*.test.js"],
-    "environment": "node"
+    "include": [
+      "tests/unit/**/*.test.js",
+      "tests/unit/**/*.test.jsx"
+    ],
+    "environmentMatchGlobs": [
+      ["tests/unit/**/*.test.jsx", "jsdom"]
+    ],
+    "environment": "node",
+    "setupFiles": []
   }
 }
