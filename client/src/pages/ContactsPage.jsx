@@ -77,9 +77,12 @@ function ContactsPage() {
       )}
 
       {!isLoading && error && (
-        <p className="text-center text-sm text-red-600" role="alert">
+        <div
+          className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800"
+          role="alert"
+        >
           {error}
-        </p>
+        </div>
       )}
 
       {!isLoading && !error && hasContacts && (

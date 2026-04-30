@@ -78,10 +78,6 @@ async function apiFetch(url, init = {}) {
  * @returns {Promise<object[]>} Array of camelCase contact objects.
  */
 export async function getContacts({ search } = {}) {
-  const url = new URL(BASE_URL, 'http://localhost');
-  if (search) {
-    url.searchParams.set('search', search);
-  }
   const data = await apiFetch(`${BASE_URL}${search ? `?search=${encodeURIComponent(search)}` : ''}`);
   return data.map(toCamel);
 }

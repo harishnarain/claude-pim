@@ -63,6 +63,7 @@ function buildStore(overrides = {}) {
     isLoading: false,
     error: null,
     fetchContact: vi.fn(),
+    createContact: vi.fn().mockResolvedValue({ ...CONTACT, id: 42 }),
     updateContact: vi.fn().mockResolvedValue(CONTACT),
     deleteContact: vi.fn().mockResolvedValue(undefined),
     ...overrides,
@@ -296,6 +297,64 @@ describe('ContactDetailPage', () => {
   it('navigates to /contacts when Back is clicked', async () => {
     render(<ContactDetailPage />);
     await userEvent.click(screen.getByRole('button', { name: /back to contacts/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/contacts');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// ContactDetailPage — create mode (id === 'new')
+// ---------------------------------------------------------------------------
+
+describe('ContactDetailPage (create mode)', () => {
+  beforeEach(() => {
+    storeState = buildStore({ selectedContact: null });
+    mockParams = { id: 'new' };
+    mockNavigate.mockClear();
+  });
+
+  it('does NOT call fetchContact when id is "new"', () => {
+    render(<ContactDetailPage />);
+    expect(storeState.fetchContact).not.toHaveBeenCalled();
+  });
+
+  it('renders a "New Contact" heading in create mode', () => {
+    render(<ContactDetailPage />);
+    expect(screen.getByRole('heading', { name: /new contact/i })).toBeInTheDocument();
+  });
+
+  it('renders an empty ContactForm in create mode', () => {
+    render(<ContactDetailPage />);
+    expect(screen.getByRole('button', { name: /^save$/i })).toBeInTheDocument();
+  });
+
+  it('Back button navigates to /contacts in create mode', async () => {
+    render(<ContactDetailPage />);
+    await userEvent.click(screen.getByRole('button', { name: /back to contacts/i }));
+    expect(mockNavigate).toHaveBeenCalledWith('/contacts');
+  });
+
+  it('calls createContact on submit and navigates to the new contact page', async () => {
+    render(<ContactDetailPage />);
+
+    await userEvent.type(screen.getByLabelText(/first name/i), 'Grace');
+    await userEvent.type(screen.getByLabelText(/last name/i), 'Hopper');
+
+    fireEvent.submit(screen.getByRole('button', { name: /^save$/i }).closest('form'));
+
+    await waitFor(() => {
+      expect(storeState.createContact).toHaveBeenCalledWith(
+        expect.objectContaining({ firstName: 'Grace', lastName: 'Hopper' })
+      );
+    });
+
+    await waitFor(() => {
+      expect(mockNavigate).toHaveBeenCalledWith('/contacts/42');
+    });
+  });
+
+  it('Cancel button navigates to /contacts in create mode', async () => {
+    render(<ContactDetailPage />);
+    await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }));
     expect(mockNavigate).toHaveBeenCalledWith('/contacts');
   });
 });

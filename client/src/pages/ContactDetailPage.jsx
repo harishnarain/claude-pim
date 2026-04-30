@@ -4,7 +4,9 @@
  * with a ConfirmDialog prompt.
  *
  * Routing behaviour:
- *   - Loads the contact by :id from the Zustand store on mount.
+ *   - When id is 'new', renders in create mode with an empty ContactForm.
+ *     On submit, calls createContact and navigates to the new contact's page.
+ *   - Loads the contact by :id from the Zustand store on mount (edit/view mode).
  *   - If the API returns 404 (or the store errors with NOT_FOUND), redirects
  *     to /contacts with a toast banner message.
  *   - After a successful delete, redirects to /contacts with a toast banner.
@@ -51,9 +53,13 @@ function ContactDetailPage() {
     isLoading,
     error,
     fetchContact,
+    createContact,
     updateContact,
     deleteContact,
   } = useContactsStore();
+
+  /** True when the route id is 'new' — renders the create-contact form. */
+  const isCreateMode = id === 'new';
 
   /** Whether the edit form is currently visible. */
   const [isEditing, setIsEditing] = useState(false);
@@ -75,11 +81,14 @@ function ContactDetailPage() {
 
   /**
    * Fetch the contact by :id when the component mounts or the id changes.
+   * Skipped when in create mode (id === 'new').
    * The store will set `error` if the contact is not found.
    */
   useEffect(() => {
-    fetchContact(id);
-  }, [id, fetchContact]);
+    if (!isCreateMode) {
+      fetchContact(id);
+    }
+  }, [id, isCreateMode, fetchContact]);
 
   /**
    * When the store sets an error that looks like a 404 / NOT_FOUND,
@@ -106,6 +115,23 @@ function ContactDetailPage() {
       showToast('Contact updated.');
     } catch {
       showToast('Failed to save changes. Please try again.');
+    }
+  }
+
+  /**
+   * Handle form submission in create mode — calls createContact in the store.
+   * On success, navigates to the new contact's detail page.
+   * On failure, shows an error toast.
+   *
+   * @param {object} data - camelCase contact fields from ContactForm.
+   * @returns {Promise<void>}
+   */
+  async function handleCreate(data) {
+    try {
+      const created = await createContact(data);
+      navigate(`/contacts/${created.id}`);
+    } catch {
+      showToast('Failed to create contact. Please try again.');
     }
   }
 
@@ -141,6 +167,42 @@ function ContactDetailPage() {
     } catch {
       showToast('Failed to delete contact. Please try again.');
     }
+  }
+
+  // Create mode — render an empty form for a new contact
+  if (isCreateMode) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        {/* Toast banner */}
+        {toast && (
+          <div
+            className="mb-4 rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800"
+            role="status"
+          >
+            {toast}
+          </div>
+        )}
+
+        {/* Page header */}
+        <div className="mb-6 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/contacts')}
+            className="text-sm text-blue-600 hover:underline focus:outline-none"
+            aria-label="Back to contacts"
+          >
+            &larr; Back
+          </button>
+          <h1 className="text-2xl font-bold text-gray-900">New Contact</h1>
+        </div>
+
+        <ContactForm
+          onSubmit={handleCreate}
+          onCancel={() => navigate('/contacts')}
+          isLoading={isLoading}
+        />
+      </div>
+    );
   }
 
   // Loading state
