@@ -1,5 +1,10 @@
 # SQLite database files
 db/pim.db
+db/pim.db-shm
+db/pim.db-wal
+
+# Reviewer Agent output
+review.md
 
 # Logs
 logs
