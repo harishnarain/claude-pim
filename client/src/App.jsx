@@ -31,11 +31,8 @@ function App() {
             {/* Contacts list view */}
             <Route path="/contacts" element={<ContactsPage />} />
 
-            {/* Create new contact — must come before :id so "new" is not
-                treated as a numeric id by ContactDetailPage */}
-            <Route path="/contacts/new" element={<ContactDetailPage />} />
-
-            {/* Contact detail / edit view */}
+            {/* Contact detail / edit / create view.
+                When :id is 'new', ContactDetailPage renders in create mode. */}
             <Route path="/contacts/:id" element={<ContactDetailPage />} />
           </Routes>
         </main>
