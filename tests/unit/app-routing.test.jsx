@@ -1,9 +1,10 @@
 /**
- * Unit tests for routing and sidebar navigation (Task 10).
+ * Unit tests for routing and sidebar navigation (Tasks 10 and 16).
  *
  * Tests cover:
- *   - Sidebar.jsx: renders Contacts nav link and applies active/inactive styles
- *   - App.jsx: mounts Sidebar and renders the expected page component per route
+ *   - Sidebar.jsx: renders Contacts and Notes nav links, active/inactive styles
+ *   - App.jsx: mounts Sidebar and renders the expected page component per route,
+ *              including the three new Notes routes added in Task 16
  *
  * react-router-dom is fully mocked so tests run without a real browser router
  * and avoid the React version conflict that arises when MemoryRouter is used
@@ -124,6 +125,14 @@ vi.mock('../../client/src/pages/ContactDetailPage.jsx', () => ({
   default: () => <div data-testid="contact-detail-page">ContactDetailPage</div>,
 }));
 
+vi.mock('../../client/src/pages/NotesPage.jsx', () => ({
+  default: () => <div data-testid="notes-page">NotesPage</div>,
+}));
+
+vi.mock('../../client/src/pages/NoteEditorPage.jsx', () => ({
+  default: () => <div data-testid="note-editor-page">NoteEditorPage</div>,
+}));
+
 // ---------------------------------------------------------------------------
 // Imports (after mocks are declared)
 // ---------------------------------------------------------------------------
@@ -189,6 +198,19 @@ describe('Sidebar', () => {
     render(<Sidebar />);
     expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
+
+  it('renders a Notes link', () => {
+    render(<Sidebar />);
+    expect(screen.getByRole('link', { name: /notes/i })).toBeInTheDocument();
+  });
+
+  it('Notes link href is /notes', () => {
+    render(<Sidebar />);
+    expect(screen.getByRole('link', { name: /notes/i })).toHaveAttribute(
+      'href',
+      '/notes',
+    );
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -235,5 +257,35 @@ describe('App routing', () => {
     render(<App />);
     const nav = screen.getByTestId('navigate');
     expect(nav).toHaveAttribute('data-to', '/contacts');
+  });
+
+  it('renders NotesPage at /notes', () => {
+    setPath('/notes');
+    render(<App />);
+    expect(screen.getByTestId('notes-page')).toBeInTheDocument();
+  });
+
+  it('renders NoteEditorPage at /notes/new', () => {
+    setPath('/notes/new');
+    render(<App />);
+    expect(screen.getByTestId('note-editor-page')).toBeInTheDocument();
+  });
+
+  it('does not render NotesPage at /notes/new', () => {
+    setPath('/notes/new');
+    render(<App />);
+    expect(screen.queryByTestId('notes-page')).not.toBeInTheDocument();
+  });
+
+  it('renders NoteEditorPage at /notes/:id', () => {
+    setPath('/notes/42');
+    render(<App />);
+    expect(screen.getByTestId('note-editor-page')).toBeInTheDocument();
+  });
+
+  it('renders the Notes sidebar link on any notes route', () => {
+    setPath('/notes');
+    render(<App />);
+    expect(screen.getByRole('link', { name: /notes/i })).toBeInTheDocument();
   });
 });
