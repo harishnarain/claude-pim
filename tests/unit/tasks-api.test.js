@@ -779,3 +779,69 @@ describe('Tag attach / detach lifecycle', () => {
     expect(tag).toBeUndefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// GET /api/task-tags
+// ---------------------------------------------------------------------------
+
+describe('GET /api/task-tags', () => {
+  it('returns 200 with data array and meta.count using the envelope format', async () => {
+    const { status, body } = await request('/api/task-tags');
+
+    expect(status).toBe(200);
+    expect(body.error).toBeNull();
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(typeof body.meta.count).toBe('number');
+  });
+
+  it('returns an empty array when no task tags exist', async () => {
+    const { status, body } = await request('/api/task-tags');
+
+    expect(status).toBe(200);
+    expect(body.data).toEqual([]);
+    expect(body.meta.count).toBe(0);
+  });
+
+  it('returns all existing task tags after tasks with tags are created', async () => {
+    await request('/api/tasks', {
+      method: 'POST',
+      body: { title: 'Task with tags', tags: ['alpha', 'beta'] },
+    });
+
+    const { status, body } = await request('/api/task-tags');
+
+    expect(status).toBe(200);
+    const names = body.data.map((t) => t.name);
+    expect(names).toContain('alpha');
+    expect(names).toContain('beta');
+    expect(body.meta.count).toBe(2);
+  });
+
+  it('each tag has id and name properties', async () => {
+    await request('/api/tasks', {
+      method: 'POST',
+      body: { title: 'Structured tag task', tags: ['structured'] },
+    });
+
+    const { body } = await request('/api/task-tags');
+
+    for (const tag of body.data) {
+      expect(tag).toHaveProperty('id');
+      expect(tag).toHaveProperty('name');
+      expect(typeof tag.id).toBe('number');
+      expect(typeof tag.name).toBe('string');
+    }
+  });
+
+  it('returns tags sorted alphabetically by name', async () => {
+    await request('/api/tasks', {
+      method: 'POST',
+      body: { title: 'Sorted task', tags: ['zebra', 'apple', 'mango'] },
+    });
+
+    const { body } = await request('/api/task-tags');
+
+    const names = body.data.map((t) => t.name);
+    expect(names).toEqual([...names].sort());
+  });
+});
