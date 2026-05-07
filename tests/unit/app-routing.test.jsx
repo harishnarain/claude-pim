@@ -133,6 +133,14 @@ vi.mock('../../client/src/pages/NoteEditorPage.jsx', () => ({
   default: () => <div data-testid="note-editor-page">NoteEditorPage</div>,
 }));
 
+vi.mock('../../client/src/pages/TasksPage.jsx', () => ({
+  default: () => <div data-testid="tasks-page">TasksPage</div>,
+}));
+
+vi.mock('../../client/src/pages/TaskEditorPage.jsx', () => ({
+  default: () => <div data-testid="task-editor-page">TaskEditorPage</div>,
+}));
+
 // ---------------------------------------------------------------------------
 // Imports (after mocks are declared)
 // ---------------------------------------------------------------------------
@@ -287,5 +295,35 @@ describe('App routing', () => {
     setPath('/notes');
     render(<App />);
     expect(screen.getByRole('link', { name: /notes/i })).toBeInTheDocument();
+  });
+
+  it('renders TasksPage at /tasks', () => {
+    setPath('/tasks');
+    render(<App />);
+    expect(screen.getByTestId('tasks-page')).toBeInTheDocument();
+  });
+
+  it('renders TaskEditorPage at /tasks/new', () => {
+    setPath('/tasks/new');
+    render(<App />);
+    expect(screen.getByTestId('task-editor-page')).toBeInTheDocument();
+  });
+
+  it('does not render TasksPage at /tasks/new', () => {
+    setPath('/tasks/new');
+    render(<App />);
+    expect(screen.queryByTestId('tasks-page')).not.toBeInTheDocument();
+  });
+
+  it('renders TaskEditorPage at /tasks/:id', () => {
+    setPath('/tasks/42');
+    render(<App />);
+    expect(screen.getByTestId('task-editor-page')).toBeInTheDocument();
+  });
+
+  it('renders the Tasks sidebar link on any tasks route', () => {
+    setPath('/tasks');
+    render(<App />);
+    expect(screen.getByRole('link', { name: /tasks/i })).toBeInTheDocument();
   });
 });

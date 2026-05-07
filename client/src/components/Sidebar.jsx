@@ -9,14 +9,79 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 
 /**
- * @constant {Array<{label: string, to: string, end?: boolean}>}
+ * @constant {Array<{label: string, to: string, end?: boolean, icon: JSX.Element}>}
  * Navigation link definitions. The `end` flag mirrors the react-router-dom
  * NavLink `end` prop — when true the link is only "active" on an exact path
  * match; when false (or absent) any sub-path also activates the link.
+ * Each entry includes an `icon` — an inline SVG React element with aria-hidden.
  */
 const NAV_LINKS = [
-  { label: 'Contacts', to: '/contacts', end: true },
-  { label: 'Notes', to: '/notes' },
+  {
+    label: 'Contacts',
+    to: '/contacts',
+    end: true,
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        {/* Circle head */}
+        <circle cx="8" cy="5" r="2.5" />
+        {/* Arc shoulders */}
+        <path d="M2 14c0-3.314 2.686-5 6-5s6 1.686 6 5" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Notes',
+    to: '/notes',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        {/* Document rectangle */}
+        <rect x="2.5" y="1.5" width="11" height="13" rx="1" />
+        {/* Three horizontal lines */}
+        <line x1="5" y1="5.5" x2="11" y2="5.5" />
+        <line x1="5" y1="8" x2="11" y2="8" />
+        <line x1="5" y1="10.5" x2="9" y2="10.5" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Tasks',
+    to: '/tasks',
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        {/* Square checkbox */}
+        <rect x="2.5" y="2.5" width="11" height="11" rx="1.5" />
+        {/* Tick mark */}
+        <polyline points="5,8 7,10.5 11,5.5" />
+      </svg>
+    ),
+  },
 ];
 
 /**
@@ -45,10 +110,13 @@ function Sidebar() {
       <span className="mb-6 px-3 text-xl font-bold text-gray-900">PIM</span>
       <nav aria-label="Main navigation">
         <ul className="space-y-1">
-          {NAV_LINKS.map(({ label, to, end }) => (
+          {NAV_LINKS.map(({ label, to, end, icon }) => (
             <li key={to}>
               <NavLink to={to} className={navLinkClass} end={end ?? false}>
-                {label}
+                <span className="flex items-center gap-2">
+                  {icon}
+                  <span>{label}</span>
+                </span>
               </NavLink>
             </li>
           ))}
