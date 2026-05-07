@@ -8,6 +8,8 @@ import express from 'express';
 import { getDb, runMigrations } from './db.js';
 import logger from './logger.js';
 import contactsRouter from './routes/contacts.js';
+import notesRouter from './routes/notes.js';
+import tagsRouter from './routes/tags.js';
 
 const PORT = process.env.PORT ?? 3001;
 
@@ -17,6 +19,12 @@ app.use(express.json());
 
 // Contacts REST API routes.
 app.use('/api/contacts', contactsRouter);
+
+// Notes REST API routes.
+app.use('/api/notes', notesRouter);
+
+// Tags REST API routes.
+app.use('/api/tags', tagsRouter);
 
 // Health-check endpoint — verifies server and DB are reachable.
 app.get('/api/health', (_req, res) => {

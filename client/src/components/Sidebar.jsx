@@ -8,9 +8,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 
-/** @constant {Array<{label: string, to: string}>} Navigation link definitions. */
+/**
+ * @constant {Array<{label: string, to: string, end?: boolean}>}
+ * Navigation link definitions. The `end` flag mirrors the react-router-dom
+ * NavLink `end` prop — when true the link is only "active" on an exact path
+ * match; when false (or absent) any sub-path also activates the link.
+ */
 const NAV_LINKS = [
-  { label: 'Contacts', to: '/contacts' },
+  { label: 'Contacts', to: '/contacts', end: true },
+  { label: 'Notes', to: '/notes' },
 ];
 
 /**
@@ -39,9 +45,9 @@ function Sidebar() {
       <span className="mb-6 px-3 text-xl font-bold text-gray-900">PIM</span>
       <nav aria-label="Main navigation">
         <ul className="space-y-1">
-          {NAV_LINKS.map(({ label, to }) => (
+          {NAV_LINKS.map(({ label, to, end }) => (
             <li key={to}>
-              <NavLink to={to} className={navLinkClass} end={to === '/contacts'}>
+              <NavLink to={to} className={navLinkClass} end={end ?? false}>
                 {label}
               </NavLink>
             </li>
