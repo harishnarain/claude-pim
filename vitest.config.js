@@ -27,5 +27,8 @@ export default defineConfig({
     environment: 'node',
     globals: true,
     setupFiles: [],
+    // Disable parallel test-file execution to prevent SQLite cross-file
+    // interference when multiple workers write to the same pim.db file.
+    fileParallelism: false,
   },
 });
