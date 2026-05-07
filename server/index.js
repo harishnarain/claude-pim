@@ -10,6 +10,7 @@ import logger from './logger.js';
 import contactsRouter from './routes/contacts.js';
 import notesRouter from './routes/notes.js';
 import tagsRouter from './routes/tags.js';
+import tasksRouter from './routes/tasks.js';
 
 const PORT = process.env.PORT ?? 3001;
 
@@ -25,6 +26,9 @@ app.use('/api/notes', notesRouter);
 
 // Tags REST API routes.
 app.use('/api/tags', tagsRouter);
+
+// Tasks REST API routes.
+app.use('/api/tasks', tasksRouter);
 
 // Health-check endpoint — verifies server and DB are reachable.
 app.get('/api/health', (_req, res) => {
