@@ -63,16 +63,25 @@ test.describe('Tasks happy path', () => {
    * @param {import('@playwright/test').APIRequestContext} request - Playwright request context.
    * @returns {Promise<void>}
    */
-  test.beforeEach(async ({ request }) => {
+  test.beforeEach(async ({ request, page }) => {
+    // Delete all tasks via the API so the test starts from an empty state.
     const res = await request.get('http://localhost:3001/api/tasks');
-    if (!res.ok()) return;
-
-    const body = await res.json();
-    const tasks = body.data ?? [];
-
-    for (const task of tasks) {
-      await request.delete(`http://localhost:3001/api/tasks/${task.id}`);
+    if (res.ok()) {
+      const body = await res.json();
+      const tasks = body.data ?? [];
+      for (const task of tasks) {
+        await request.delete(`http://localhost:3001/api/tasks/${task.id}`);
+      }
     }
+
+    // Clear task-related localStorage keys so filters and sort don't carry over
+    // from a previous run and cause the wrong empty-state message to appear.
+    await page.goto('/tasks');
+    await page.evaluate(() => {
+      localStorage.removeItem('tasks_sort');
+      localStorage.removeItem('tasks_filter_status');
+      localStorage.removeItem('tasks_filter_priority');
+    });
   });
 
   test('full journey: create → tag → status → pin → delete', async ({ page }) => {
@@ -160,14 +169,14 @@ test.describe('Tasks happy path', () => {
     // The task card should display the title.
     await expect(page.getByText(TASK_TITLE)).toBeVisible();
 
-    // The priority badge should show "High".
-    await expect(page.getByText('High')).toBeVisible();
-
-    // The status badge should show "In Progress".
-    await expect(page.getByText('In Progress')).toBeVisible();
+    // The task card list item should show priority badge "High" and status badge "In Progress".
+    // Scope to <span> pills (badges) to avoid matching the inline status <select> options.
+    const taskCard = page.getByRole('listitem').filter({ hasText: TASK_TITLE });
+    await expect(taskCard.locator('span', { hasText: 'High' }).first()).toBeVisible();
+    await expect(taskCard.locator('span', { hasText: 'In Progress' })).toBeVisible();
 
     // The tag chip should appear on the card.
-    await expect(page.getByText(TEST_TAG)).toBeVisible();
+    await expect(taskCard.getByText(TEST_TAG)).toBeVisible();
 
     // -------------------------------------------------------------------------
     // Step 8: Change the status via the inline select to "Completed".
@@ -231,9 +240,11 @@ test.describe('Tasks happy path', () => {
 
     // The first list item should contain the pinned task title ("Buy groceries").
     // pinnedDone sorts before unpinnedActive in the store derivation.
-    const listItems = page.getByRole('list').getByRole('listitem');
+    // Use the main content area to avoid matching the sidebar nav list.
+    const taskList = page.locator('main ul[role="list"]');
+    const listItems = taskList.getByRole('listitem');
     const firstItem = listItems.first();
-    await expect(firstItem).toContainText(TASK_TITLE);
+    await expect(firstItem).toContainText(TASK_TITLE, { timeout: 5000 });
 
     // The second item should be the second task.
     const secondItem = listItems.nth(1);

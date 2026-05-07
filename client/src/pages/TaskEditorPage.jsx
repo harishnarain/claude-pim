@@ -71,11 +71,11 @@ function TaskEditorPage() {
 
   const isCreateMode = !!useMatch('/tasks/new') || id === 'new';
 
-  // Sync localTask when selectedTask changes (e.g. after initial load).
+  // Sync localTask when selectedTask changes (e.g. after initial load or navigating to a new task).
+  // Guard: skip if the user has already started editing to avoid overwriting in-flight changes.
   useEffect(() => {
-    if (selectedTask) {
+    if (selectedTask && !hasUnsavedRef.current) {
       setLocalTask({ ...selectedTask });
-      hasUnsavedRef.current = false;
     }
   }, [selectedTask?.id]);
 

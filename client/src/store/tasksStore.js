@@ -216,7 +216,7 @@ export const useTasksStore = create((set, get) => ({
    * @returns {Promise<void>}
    */
   fetchTask: async (id) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, selectedTask: null, saveStatus: 'idle' });
     try {
       const task = await getTask(id);
       set({ selectedTask: task, isLoading: false });
