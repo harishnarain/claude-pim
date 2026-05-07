@@ -43,8 +43,7 @@ function App() {
             {/* Notes list view */}
             <Route path="/notes" element={<NotesPage />} />
 
-            {/* Note editor — create mode when path is /notes/new, edit mode otherwise */}
-            <Route path="/notes/new" element={<NoteEditorPage />} />
+            {/* Note editor — create mode when :id is 'new', edit mode otherwise */}
             <Route path="/notes/:id" element={<NoteEditorPage />} />
           </Routes>
         </main>

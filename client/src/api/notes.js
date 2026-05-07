@@ -18,6 +18,7 @@ const BASE_URL = '/api/notes';
 function toCamel(note) {
   return {
     id: note.id,
+    content: note.content,
     title: note.title,
     preview: note.preview,
     tags: note.tags,

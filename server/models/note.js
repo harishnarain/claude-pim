@@ -112,7 +112,13 @@ function update(id, fields) {
 
   const ALLOWED_COLUMNS = ['content', 'is_pinned'];
 
-  const setClauses = Object.keys(fields)
+  // Normalize boolean is_pinned to SQLite-compatible integer (1 or 0).
+  const normalizedFields = { ...fields };
+  if (normalizedFields.is_pinned !== undefined) {
+    normalizedFields.is_pinned = normalizedFields.is_pinned ? 1 : 0;
+  }
+
+  const setClauses = Object.keys(normalizedFields)
     .filter((key) => ALLOWED_COLUMNS.includes(key))
     .map((key) => `${key} = @${key}`);
 
@@ -128,7 +134,7 @@ function update(id, fields) {
     WHERE id = @id
   `);
 
-  stmt.run({ ...fields, id });
+  stmt.run({ ...normalizedFields, id });
 
   return findById(id);
 }

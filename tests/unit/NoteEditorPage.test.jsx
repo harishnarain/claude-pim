@@ -9,7 +9,7 @@
  *   - Edit-mode: calls fetchNote + fetchTags on mount, renders content/tags/pin
  *   - Auto-save debounce fires after 800 ms of inactivity
  *   - Blur flushes the debounce immediately (calls updateNote synchronously)
- *   - Pin toggle calls updateNote with is_pinned immediately
+ *   - Pin toggle calls updateNote with isPinned immediately
  *   - Tag change calls updateNote with new tags then fetchTags
  *   - Delete button opens ConfirmDialog; confirm calls deleteNote and navigates
  *   - Cancel in ConfirmDialog closes without deleting
@@ -347,23 +347,23 @@ describe('NoteEditorPage — pin toggle', () => {
     mockNavigate.mockClear();
   });
 
-  it('calls updateNote with toggled is_pinned immediately when pin button is clicked', async () => {
+  it('calls updateNote with toggled isPinned immediately when pin button is clicked', async () => {
     render(<NoteEditorPage />);
     const pinBtn = screen.getByRole('button', { name: /^pin$/i });
 
     await userEvent.click(pinBtn);
 
-    expect(storeState.updateNote).toHaveBeenCalledWith(42, { is_pinned: true });
+    expect(storeState.updateNote).toHaveBeenCalledWith(42, { isPinned: true });
   });
 
-  it('toggles is_pinned to false when the note is already pinned', async () => {
+  it('toggles isPinned to false when the note is already pinned', async () => {
     storeState = buildStore({ selectedNote: { ...NOTE, isPinned: true } });
     render(<NoteEditorPage />);
     const pinBtn = screen.getByRole('button', { name: /^pinned$/i });
 
     await userEvent.click(pinBtn);
 
-    expect(storeState.updateNote).toHaveBeenCalledWith(42, { is_pinned: false });
+    expect(storeState.updateNote).toHaveBeenCalledWith(42, { isPinned: false });
   });
 });
 

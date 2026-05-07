@@ -95,21 +95,30 @@ function NoteEditorPage() {
     if (!isCreateMode) return;
 
     let cancelled = false;
+    let createdId = null;
 
     /**
      * Create a blank note then navigate to its permanent URL.
+     * Stores the created ID so the cleanup can delete it if this effect is
+     * superseded (e.g. React StrictMode double-invocation).
      * @returns {Promise<void>}
      */
     async function initCreate() {
       setIsCreating(true);
       try {
         const created = await createNote({ content: '', is_pinned: false, tags: [] });
+        createdId = created.id;
         if (!cancelled) {
+          setIsCreating(false);
           navigate(`/notes/${created.id}`, { replace: true });
+        } else {
+          // This invocation was superseded — delete the orphaned blank note.
+          deleteNote(created.id);
         }
       } catch {
         // If creation fails, navigate back to the list.
         if (!cancelled) {
+          setIsCreating(false);
           navigate('/notes');
         }
       }
@@ -244,7 +253,7 @@ function NoteEditorPage() {
    */
   function handleTogglePin() {
     if (!selectedNote) return;
-    updateNote(Number(id), { is_pinned: !selectedNote.isPinned });
+    updateNote(Number(id), { isPinned: !selectedNote.isPinned });
   }
 
   /**
