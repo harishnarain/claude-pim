@@ -10,35 +10,18 @@
  *   (404 or null selectedNote after loading), redirects to `/notes` with a
  *   toast in router state.
  *
- * Auto-save:
- *   A 800 ms debounce fires after each `NoteEditor` onChange. On blur,
- *   the debounce is flushed immediately. Content longer than 25 000 characters
- *   is not sent to the API.
- *
- * Pin and tags:
- *   Both are saved immediately (no debounce). Tag changes also refresh the
- *   available tag list via `fetchTags`.
- *
- * Delete:
- *   `NoteToolbar.onDelete` opens a `ConfirmDialog`. On confirm, calls
- *   `deleteNote` and navigates to `/notes`.
- *
- * Layout:
- *   `NoteEditor` and `MarkdownView` are stacked on narrow screens and
- *   side-by-side on `md` and wider. `NoteToolbar` sits above them and
- *   `TagCombobox` sits below.
- *
  * @returns {JSX.Element}
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams, useMatch } from 'react-router-dom';
 import { useNotesStore } from '../store/notesStore.js';
 import NoteToolbar from '../components/NoteToolbar.jsx';
 import NoteEditor from '../components/NoteEditor.jsx';
 import MarkdownView from '../components/MarkdownView.jsx';
 import TagCombobox from '../components/TagCombobox.jsx';
 import ConfirmDialog from '../components/ConfirmDialog.jsx';
+import useAutoSave from '../hooks/useAutoSave.js';
 
 /** Maximum allowed content length (characters). Saves are blocked above this. */
 const CHAR_LIMIT = 25000;
@@ -70,22 +53,21 @@ function NoteEditorPage() {
   /** True while we are creating the initial blank note in create mode. */
   const [isCreating, setIsCreating] = useState(false);
 
-  /** Local content that diverges from the store during typing. */
-  const [localContent, setLocalContent] = useState('');
-
-  /** Whether local content has unsaved changes pending a debounce flush. */
-  const hasUnsavedRef = useRef(false);
-
-  /** Debounce timer ref — cleared and reset on every keystroke. */
-  const debounceTimerRef = useRef(null);
-
   /** Whether the delete ConfirmDialog is open. */
   const [showConfirm, setShowConfirm] = useState(false);
 
   /** True once the selectedNote has been loaded so we can show a 404 redirect. */
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  const isCreateMode = id === 'new';
+  const isCreateMode = !!useMatch('/notes/new') || id === 'new';
+
+  const { localContent, handleContentChange, handleEditorBlur } = useAutoSave({
+    initialContent: selectedNote?.content ?? '',
+    resetKey: selectedNote?.id,
+    onSave: (content) => updateNote(Number(id), { content }),
+    charLimit: CHAR_LIMIT,
+    debounceMs: DEBOUNCE_MS,
+  });
 
   // ---------------------------------------------------------------------------
   // Create mode — create a blank note and redirect to its URL.
@@ -95,28 +77,18 @@ function NoteEditorPage() {
     if (!isCreateMode) return;
 
     let cancelled = false;
-    let createdId = null;
 
-    /**
-     * Create a blank note then navigate to its permanent URL.
-     * Stores the created ID so the cleanup can delete it if this effect is
-     * superseded (e.g. React StrictMode double-invocation).
-     * @returns {Promise<void>}
-     */
     async function initCreate() {
       setIsCreating(true);
       try {
-        const created = await createNote({ content: '', is_pinned: false, tags: [] });
-        createdId = created.id;
+        const created = await createNote({ content: '', isPinned: false, tags: [] });
         if (!cancelled) {
           setIsCreating(false);
           navigate(`/notes/${created.id}`, { replace: true });
         } else {
-          // This invocation was superseded — delete the orphaned blank note.
           deleteNote(created.id);
         }
       } catch {
-        // If creation fails, navigate back to the list.
         if (!cancelled) {
           setIsCreating(false);
           navigate('/notes');
@@ -139,10 +111,6 @@ function NoteEditorPage() {
   useEffect(() => {
     if (isCreateMode) return;
 
-    /**
-     * Load the note and available tags.
-     * @returns {Promise<void>}
-     */
     async function load() {
       await fetchNote(id);
       await fetchTags();
@@ -154,139 +122,40 @@ function NoteEditorPage() {
   }, [id]);
 
   // ---------------------------------------------------------------------------
-  // Sync local content from the store when selectedNote first arrives.
-  // ---------------------------------------------------------------------------
-
-  useEffect(() => {
-    if (selectedNote) {
-      setLocalContent(selectedNote.content ?? '');
-      hasUnsavedRef.current = false;
-    }
-  }, [selectedNote?.id]);
-
-  // ---------------------------------------------------------------------------
   // 404 redirect — when the note is not found after loading completes.
   // ---------------------------------------------------------------------------
 
   useEffect(() => {
-    if (
-      hasLoaded &&
-      !isCreateMode &&
-      !isLoading &&
-      !selectedNote &&
-      (error === null || error === undefined || error.includes('404') || error.toLowerCase().includes('not found'))
-    ) {
+    if (hasLoaded && !isCreateMode && !isLoading && !selectedNote) {
       navigate('/notes', { state: { toast: 'Note not found.' } });
     }
-  }, [hasLoaded, isLoading, selectedNote, error, isCreateMode, navigate]);
+  }, [hasLoaded, isLoading, selectedNote, isCreateMode, navigate]);
 
   useEffect(() => {
-    if (
-      !isCreateMode &&
-      error &&
-      (error.includes('404') || error.toLowerCase().includes('not found'))
-    ) {
+    if (!isCreateMode && error && (error.includes('404') || error.toLowerCase().includes('not found'))) {
       navigate('/notes', { state: { toast: 'Note not found.' } });
     }
   }, [error, isCreateMode, navigate]);
 
   // ---------------------------------------------------------------------------
-  // Helpers
+  // Handlers
   // ---------------------------------------------------------------------------
 
-  /**
-   * Flush any pending debounce and save the current local content immediately.
-   * @returns {void}
-   */
-  function flushSave() {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-      debounceTimerRef.current = null;
-    }
-    if (hasUnsavedRef.current && selectedNote) {
-      if (localContent.length <= CHAR_LIMIT) {
-        hasUnsavedRef.current = false;
-        updateNote(Number(id), { content: localContent });
-      }
-    }
-  }
-
-  /**
-   * Handle content changes from NoteEditor — update local state and schedule
-   * a debounced save.
-   * @param {string} newContent - Updated content string.
-   * @returns {void}
-   */
-  function handleContentChange(newContent) {
-    setLocalContent(newContent);
-    hasUnsavedRef.current = true;
-
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
-    if (newContent.length > CHAR_LIMIT) {
-      // Block the save client-side.
-      return;
-    }
-
-    debounceTimerRef.current = setTimeout(() => {
-      debounceTimerRef.current = null;
-      if (hasUnsavedRef.current) {
-        hasUnsavedRef.current = false;
-        updateNote(Number(id), { content: newContent });
-      }
-    }, DEBOUNCE_MS);
-  }
-
-  /**
-   * On NoteEditor blur, flush the debounce immediately.
-   * @returns {void}
-   */
-  function handleEditorBlur() {
-    flushSave();
-  }
-
-  /**
-   * Toggle the pin state of the current note immediately.
-   * @returns {void}
-   */
+  /** Toggle the pin state of the current note immediately. */
   function handleTogglePin() {
     if (!selectedNote) return;
     updateNote(Number(id), { isPinned: !selectedNote.isPinned });
   }
 
   /**
-   * Handle tag list changes from TagCombobox.
-   * Saves immediately, then refreshes the available tag list.
+   * Handle tag list changes — save immediately, then refresh available tags.
    * @param {Array<string|{id:number,name:string}>} newTags
-   * @returns {Promise<void>}
    */
   async function handleTagsChange(newTags) {
     await updateNote(Number(id), { tags: newTags });
     await fetchTags();
   }
 
-  /**
-   * Open the delete confirmation dialog.
-   * @returns {void}
-   */
-  function handleDelete() {
-    setShowConfirm(true);
-  }
-
-  /**
-   * Cancel the delete — close the dialog without deleting.
-   * @returns {void}
-   */
-  function handleCancelDelete() {
-    setShowConfirm(false);
-  }
-
-  /**
-   * Confirm the delete — call deleteNote then navigate to /notes.
-   * @returns {Promise<void>}
-   */
   async function handleConfirmDelete() {
     setShowConfirm(false);
     await deleteNote(Number(id));
@@ -294,7 +163,7 @@ function NoteEditorPage() {
   }
 
   // ---------------------------------------------------------------------------
-  // Render — create mode spinner
+  // Render
   // ---------------------------------------------------------------------------
 
   if (isCreateMode || isCreating) {
@@ -305,7 +174,6 @@ function NoteEditorPage() {
     );
   }
 
-  // Render — loading state
   if (isLoading && !selectedNote) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -314,31 +182,22 @@ function NoteEditorPage() {
     );
   }
 
-  // Render — note not yet available (avoids flash before 404 redirect fires)
-  if (!selectedNote) {
-    return null;
-  }
+  if (!selectedNote) return null;
 
   const isPinned = selectedNote.isPinned ?? false;
   const selectedTags = selectedNote.tags ?? [];
 
   return (
     <div className="flex h-full flex-col">
-      {/* Toolbar */}
       <NoteToolbar
         isPinned={isPinned}
         onTogglePin={handleTogglePin}
-        onDelete={handleDelete}
+        onDelete={() => setShowConfirm(true)}
         isSaving={isSaving}
       />
 
-      {/* Editor / Preview columns */}
       <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4 md:flex-row">
-        {/* Left — editable textarea (onBlur on the wrapper flushes debounce) */}
-        <div
-          className="flex flex-1 flex-col overflow-hidden"
-          onBlur={handleEditorBlur}
-        >
+        <div className="flex flex-1 flex-col overflow-hidden" onBlur={handleEditorBlur}>
           <NoteEditor
             content={localContent}
             onChange={handleContentChange}
@@ -346,13 +205,11 @@ function NoteEditorPage() {
           />
         </div>
 
-        {/* Right — markdown preview */}
         <div className="flex-1 overflow-auto rounded-md border border-gray-200 bg-white p-3">
           <MarkdownView content={localContent} />
         </div>
       </div>
 
-      {/* Tag combobox */}
       <div className="border-t border-gray-200 bg-white px-4 py-3">
         <TagCombobox
           selected={selectedTags}
@@ -361,12 +218,11 @@ function NoteEditorPage() {
         />
       </div>
 
-      {/* Delete confirmation dialog */}
       <ConfirmDialog
         isOpen={showConfirm}
         message="Are you sure you want to delete this note? This action cannot be undone."
         onConfirm={handleConfirmDelete}
-        onCancel={handleCancelDelete}
+        onCancel={() => setShowConfirm(false)}
       />
     </div>
   );

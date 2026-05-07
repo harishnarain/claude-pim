@@ -87,4 +87,15 @@ function syncNoteTags(noteId, tagNames) {
   return getTagsForNote(noteId);
 }
 
-export { findAll, syncNoteTags, getTagsForNote };
+/**
+ * Delete all tags that are no longer associated with any note.
+ * @returns {void}
+ */
+function deleteOrphans() {
+  const db = getDb();
+  db.prepare(
+    'DELETE FROM tags WHERE id NOT IN (SELECT DISTINCT tag_id FROM note_tags)'
+  ).run();
+}
+
+export { findAll, syncNoteTags, getTagsForNote, deleteOrphans };

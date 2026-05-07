@@ -63,7 +63,7 @@ test.describe('Contacts happy path', () => {
     await page.goto('/contacts');
 
     await expect(
-      page.getByRole('heading', { name: 'Contacts' }),
+      page.getByRole('heading', { name: 'Contacts', exact: true }).first(),
     ).toBeVisible();
 
     // The empty state heading is rendered by EmptyState when there are no contacts.
@@ -92,23 +92,11 @@ test.describe('Contacts happy path', () => {
     await page.getByRole('button', { name: 'Save' }).click();
 
     // ------------------------------------------------------------------
-    // Step 4: Verify the new contact appears in the contacts list.
+    // Step 4: After create the app navigates to the new contact's detail page.
     // ------------------------------------------------------------------
-    // After a successful create the app navigates back to /contacts.
-    await expect(page).toHaveURL(/\/contacts$/);
+    await expect(page).toHaveURL(/\/contacts\/\d+/);
 
     const fullName = `${CONTACT.firstName} ${CONTACT.lastName}`;
-
-    // The contact row should now be visible in the list.
-    await expect(page.getByText(fullName)).toBeVisible();
-
-    // ------------------------------------------------------------------
-    // Step 5: Click the contact row to open the detail view.
-    // ------------------------------------------------------------------
-    await page.getByText(fullName).click();
-
-    // The URL should change to /contacts/:id.
-    await expect(page).toHaveURL(/\/contacts\/\d+/);
 
     // The detail page heading should display the full name.
     await expect(
@@ -118,6 +106,19 @@ test.describe('Contacts happy path', () => {
     // All submitted fields should be visible.
     await expect(page.getByText(CONTACT.email)).toBeVisible();
     await expect(page.getByText(CONTACT.company)).toBeVisible();
+
+    // ------------------------------------------------------------------
+    // Step 5: Navigate back to the list and verify the card is there.
+    // ------------------------------------------------------------------
+    await page.getByRole('link', { name: 'Contacts' }).first().click();
+    await expect(page).toHaveURL(/\/contacts$/);
+
+    // The contact row should now be visible in the list.
+    await expect(page.getByText(fullName)).toBeVisible();
+
+    // Click back into the detail view for further steps.
+    await page.getByText(fullName).click();
+    await expect(page).toHaveURL(/\/contacts\/\d+/);
 
     // ------------------------------------------------------------------
     // Step 6: Edit the contact — update the Company field.

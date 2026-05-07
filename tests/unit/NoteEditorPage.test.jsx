@@ -35,6 +35,7 @@ let mockParams = { id: '42' };
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
   useParams: () => mockParams,
+  useMatch: (pattern) => (pattern === '/notes/new' && mockParams.id === undefined ? {} : null),
 }));
 
 /** Mutable store state — reset in beforeEach. */
@@ -167,7 +168,7 @@ describe('NoteEditorPage — create mode (id === "new")', () => {
     await waitFor(() => {
       expect(storeState.createNote).toHaveBeenCalledWith({
         content: '',
-        is_pinned: false,
+        isPinned: false,
         tags: [],
       });
     });

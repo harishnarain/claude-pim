@@ -9,7 +9,6 @@
 import { Router } from 'express';
 import * as Note from '../models/note.js';
 import * as Tag from '../models/tag.js';
-import { getDb } from '../db.js';
 import logger from '../logger.js';
 
 const router = Router();
@@ -229,9 +228,7 @@ router.delete('/:id', (req, res) => {
   Note.destroy(id);
 
   // Run orphan tag cleanup after deletion (note_tags rows already removed by ON DELETE CASCADE).
-  getDb()
-    .prepare('DELETE FROM tags WHERE id NOT IN (SELECT DISTINCT tag_id FROM note_tags)')
-    .run();
+  Tag.deleteOrphans();
 
   logger.info(`DELETE /api/notes/${id} — deleted`);
   res.status(200).json(ok({ deleted: true }));
