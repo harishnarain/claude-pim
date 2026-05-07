@@ -45,8 +45,14 @@ beforeEach(() => {
 
 /**
  * Close the server and database after all tests finish.
+ * Wipe all test data first so subsequent test suites start with a clean DB.
  */
 afterAll(async () => {
+  const db = getDb();
+  db.prepare('DELETE FROM note_tags').run();
+  db.prepare('DELETE FROM notes').run();
+  db.prepare('DELETE FROM tags').run();
+
   await new Promise((resolve, reject) => {
     server.close((err) => (err ? reject(err) : resolve()));
   });
@@ -412,5 +418,41 @@ describe('DELETE /api/notes/:id', () => {
 
     expect(status).toBe(404);
     expect(body.error.code).toBe('NOT_FOUND');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/tags
+// ---------------------------------------------------------------------------
+
+describe('GET /api/tags', () => {
+  it('returns 200 with an empty array when no tags exist', async () => {
+    const { status, body } = await request('/api/tags');
+
+    expect(status).toBe(200);
+    expect(body.error).toBeNull();
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data.length).toBe(0);
+    expect(body.meta.count).toBe(0);
+  });
+
+  it('returns all tags sorted by name after notes with tags are created', async () => {
+    await request('/api/notes', {
+      method: 'POST',
+      body: { content: 'Note with tags', tags: ['zebra', 'alpha'] },
+    });
+
+    const { status, body } = await request('/api/tags');
+
+    expect(status).toBe(200);
+    expect(body.error).toBeNull();
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.meta.count).toBe(2);
+
+    const names = body.data.map((t) => t.name);
+    expect(names).toContain('alpha');
+    expect(names).toContain('zebra');
+    // Tags are sorted by name ascending — alpha comes before zebra.
+    expect(names.indexOf('alpha')).toBeLessThan(names.indexOf('zebra'));
   });
 });
