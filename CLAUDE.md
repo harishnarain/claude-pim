@@ -151,13 +151,61 @@ Every feature follows this pipeline. **No implementation starts without an appro
 
 ---
 
+## Session Startup Checklist
+
+**Every agent, every session, before touching any file or writing any code:**
+
+```
+Step 1 — Check current branch:
+  $ git branch --show-current
+
+Step 2 — If the output is `main` or `master`: STOP.
+  Create or switch to the correct feature branch:
+  $ git checkout -b feature/{feature-name}
+  OR switch to the existing branch:
+  $ git checkout feature/{feature-name}
+
+Step 3 — Confirm you are on the feature branch, then proceed.
+  Report to the user: "✅ On branch feature/{feature-name}. Proceeding."
+```
+
+**This check is not optional. It runs before the first file read, the first
+code change, and the first commit — every single session without exception.**
+
+---
+
 ## Git Conventions
 
+### Branch Rules (HARD RULES — never negotiated)
+
+- **Never commit to `main` or `master` directly. Ever.**
+- Every piece of work happens on a named branch.
 - Branch naming: `feature/{feature-name}`, `fix/{issue}`, `chore/{topic}`
-- One commit per completed task from `tasks.md`
-- Commit message format: `feat(contacts): add create contact API endpoint`
-- **Never commit directly to `main`** — use PRs (even when solo)
-- Each commit must pass `npm test` before being committed (enforced by hook)
+- If you are unsure which branch to use, ask the user before proceeding.
+- If `git status` shows you are on `main`, stop and switch before writing anything.
+
+### Per-Task Commit Discipline
+
+- One commit per completed task from `tasks.md` — not one commit per session
+- Commit message format (Conventional Commits): `feat(contacts): add create contact API endpoint`
+- Each commit must pass `npm test` before being made
+- Never batch multiple tasks into one commit
+
+### Pull Request Flow
+
+- **Never merge directly to `main`** — open a PR even when working solo
+- PR title mirrors the feature branch name
+- PR description references the spec: `.claudedoc/{feature}/requirements.md`
+
+### If You Forget (Recovery)
+
+If a commit was accidentally made to `main`:
+```bash
+# Move the commit to a new branch, reset main
+git checkout -b feature/{feature-name}
+git checkout main
+git reset --hard HEAD~1   # undo the commit on main
+```
 
 ---
 
@@ -185,6 +233,8 @@ Every feature follows this pipeline. **No implementation starts without an appro
 ## Do's and Don'ts for All Agents
 
 ### DO
+- Run the **Session Startup Checklist** (above) before anything else
+- Confirm your branch with `git branch --show-current` and report it to the user
 - Read this file at the start of every session
 - Update the Phase Status table when a phase completes
 - Ask clarifying questions before writing specs or code
@@ -192,6 +242,8 @@ Every feature follows this pipeline. **No implementation starts without an appro
 - Reference spec files using `@.claudedoc/contacts/requirements.md` syntax
 
 ### DON'T
+- Touch any file before confirming you are on a feature branch
+- Commit to `main` or `master` under any circumstances
 - Start implementing before a spec is approved
 - Add dependencies not listed in the Tech Stack section
 - Skip writing tests
