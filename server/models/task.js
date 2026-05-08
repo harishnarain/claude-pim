@@ -40,20 +40,21 @@ function buildOrderBy(sort) {
 
 /**
  * Create a new task record.
- * @param {{ title: string, body?: string, due_date?: string, priority?: string, status?: string, is_pinned?: number|boolean }} fields - Task fields.
- * @returns {{ id: number, title: string, body: string|null, due_date: string|null, priority: string, status: string, is_pinned: number, created_at: string, updated_at: string }} The newly created task row.
+ * @param {{ title: string, body?: string, due_date?: string, due_time?: string, priority?: string, status?: string, is_pinned?: number|boolean }} fields - Task fields.
+ * @returns {{ id: number, title: string, body: string|null, due_date: string|null, due_time: string|null, priority: string, status: string, is_pinned: number, created_at: string, updated_at: string }} The newly created task row.
  */
 function create(fields) {
   const db = getDb();
   const stmt = db.prepare(`
-    INSERT INTO tasks (title, body, due_date, priority, status, is_pinned)
-    VALUES (@title, @body, @due_date, @priority, @status, @is_pinned)
+    INSERT INTO tasks (title, body, due_date, due_time, priority, status, is_pinned)
+    VALUES (@title, @body, @due_date, @due_time, @priority, @status, @is_pinned)
   `);
 
   const info = stmt.run({
     title: fields.title ?? '',
     body: fields.body ?? null,
     due_date: fields.due_date ?? null,
+    due_time: fields.due_time ?? null,
     priority: fields.priority ?? 'Low',
     status: fields.status ?? 'Not Started',
     is_pinned: fields.is_pinned ? 1 : 0,
@@ -123,7 +124,7 @@ function findAll({ sort = 'due_asc', status = [], priority = [] } = {}) {
 /**
  * Find a single task by its primary key. Returns the full body (not a preview).
  * @param {number} id - The task's integer ID.
- * @returns {{ id: number, title: string, body: string|null, due_date: string|null, priority: string, status: string, is_pinned: number, created_at: string, updated_at: string } | undefined} The task row, or undefined if not found.
+ * @returns {{ id: number, title: string, body: string|null, due_date: string|null, due_time: string|null, priority: string, status: string, is_pinned: number, created_at: string, updated_at: string } | undefined} The task row, or undefined if not found.
  */
 function findById(id) {
   const db = getDb();
@@ -133,6 +134,7 @@ function findById(id) {
       title,
       body,
       due_date,
+      due_time,
       priority,
       status,
       is_pinned,
@@ -148,13 +150,13 @@ function findById(id) {
  * Update a task record with the given fields. Only provided fields are changed.
  * updated_at is always refreshed to the current UTC datetime.
  * @param {number} id - The task's integer ID.
- * @param {{ title?: string, body?: string, due_date?: string, priority?: string, status?: string, is_pinned?: number|boolean }} fields - Fields to update (partial).
- * @returns {{ id: number, title: string, body: string|null, due_date: string|null, priority: string, status: string, is_pinned: number, created_at: string, updated_at: string } | undefined} The updated task row, or undefined if not found.
+ * @param {{ title?: string, body?: string, due_date?: string, due_time?: string, priority?: string, status?: string, is_pinned?: number|boolean }} fields - Fields to update (partial).
+ * @returns {{ id: number, title: string, body: string|null, due_date: string|null, due_time: string|null, priority: string, status: string, is_pinned: number, created_at: string, updated_at: string } | undefined} The updated task row, or undefined if not found.
  */
 function update(id, fields) {
   const db = getDb();
 
-  const ALLOWED_COLUMNS = ['title', 'body', 'due_date', 'priority', 'status', 'is_pinned'];
+  const ALLOWED_COLUMNS = ['title', 'body', 'due_date', 'due_time', 'priority', 'status', 'is_pinned'];
 
   // Normalize boolean is_pinned to SQLite-compatible integer (1 or 0).
   const normalizedFields = { ...fields };
