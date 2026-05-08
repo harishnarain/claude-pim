@@ -22,6 +22,7 @@ function toCamel(task) {
     body: task.body,
     bodyPreview: task.body_preview,
     dueDate: task.due_date,
+    dueTime: task.due_time,
     priority: task.priority,
     status: task.status,
     tags: task.tags,
@@ -53,6 +54,7 @@ function toSnake(task) {
   if (task.title !== undefined) result.title = task.title;
   if (task.body !== undefined) result.body = task.body;
   if (task.dueDate !== undefined) result.due_date = task.dueDate;
+  if (task.dueTime !== undefined) result.due_time = task.dueTime;
   if (task.priority !== undefined) result.priority = task.priority;
   if (task.status !== undefined) result.status = task.status;
   if (task.isPinned !== undefined) result.is_pinned = task.isPinned;
