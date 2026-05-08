@@ -176,7 +176,7 @@ Every feature follows this pipeline. **No implementation starts without an appro
 |-------|-------------|-------------|----------------------------|
 | 1     | Contacts    | ✅ Complete    | `.claudedoc/contacts/`  |
 | 2     | Notes       | ✅ Complete    | `.claudedoc/notes/`     |
-| 3     | Tasks       | ⬜ Not Started | —                        |
+| 3     | Tasks       | ✅ Complete    | `.claudedoc/tasks/`     |
 | 4     | Calendar    | ⬜ Not Started | —                        |
 | 5     | Search      | ⬜ Not Started | —                        |
 
