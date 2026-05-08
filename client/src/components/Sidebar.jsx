@@ -82,6 +82,39 @@ const NAV_LINKS = [
       </svg>
     ),
   },
+  {
+    label: 'Calendar',
+    to: '/calendar',
+    end: false,
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        {/* Outer rectangle */}
+        <rect x="1.5" y="2.5" width="13" height="12" rx="1.5" />
+        {/* Header separator line */}
+        <line x1="1.5" y1="6.5" x2="14.5" y2="6.5" />
+        {/* Left peg */}
+        <line x1="5" y1="1" x2="5" y2="4" />
+        {/* Right peg */}
+        <line x1="11" y1="1" x2="11" y2="4" />
+        {/* Grid dots — row 1 */}
+        <line x1="5" y1="9.5" x2="5" y2="9.5" strokeLinecap="round" strokeWidth="2" />
+        <line x1="8" y1="9.5" x2="8" y2="9.5" strokeLinecap="round" strokeWidth="2" />
+        <line x1="11" y1="9.5" x2="11" y2="9.5" strokeLinecap="round" strokeWidth="2" />
+        {/* Grid dots — row 2 */}
+        <line x1="5" y1="12.5" x2="5" y2="12.5" strokeLinecap="round" strokeWidth="2" />
+        <line x1="8" y1="12.5" x2="8" y2="12.5" strokeLinecap="round" strokeWidth="2" />
+      </svg>
+    ),
+  },
 ];
 
 /**

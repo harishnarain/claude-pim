@@ -4,15 +4,17 @@
  * the persistent Sidebar navigation.
  *
  * Routes:
- *   /contacts        → ContactsPage (list view)
- *   /contacts/new    → ContactDetailPage in create mode
- *   /contacts/:id    → ContactDetailPage for an existing contact
- *   /notes           → NotesPage (list view)
- *   /notes/new       → NoteEditorPage in create mode
- *   /notes/:id       → NoteEditorPage for an existing note
- *   /tasks           → TasksPage (list view)
- *   /tasks/new       → TaskEditorPage in create mode
- *   /tasks/:id       → TaskEditorPage for an existing task
+ *   /contacts              → ContactsPage (list view)
+ *   /contacts/new          → ContactDetailPage in create mode
+ *   /contacts/:id          → ContactDetailPage for an existing contact
+ *   /notes                 → NotesPage (list view)
+ *   /notes/new             → NoteEditorPage in create mode
+ *   /notes/:id             → NoteEditorPage for an existing note
+ *   /tasks                 → TasksPage (list view)
+ *   /tasks/new             → TaskEditorPage in create mode
+ *   /tasks/:id             → TaskEditorPage for an existing task
+ *   /calendar              → CalendarPage (month view)
+ *   /calendar/events/:id   → EventEditorPage for an existing or new event
  */
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -23,6 +25,8 @@ import NotesPage from './pages/NotesPage.jsx';
 import NoteEditorPage from './pages/NoteEditorPage.jsx';
 import TasksPage from './pages/TasksPage.jsx';
 import TaskEditorPage from './pages/TaskEditorPage.jsx';
+import CalendarPage from './pages/CalendarPage.jsx';
+import EventEditorPage from './pages/EventEditorPage.jsx';
 
 /**
  * App — root component wrapping the entire PIM UI.
@@ -62,6 +66,12 @@ function App() {
 
             {/* Task editor — edit mode */}
             <Route path="/tasks/:id" element={<TaskEditorPage />} />
+
+            {/* Calendar month view */}
+            <Route path="/calendar" element={<CalendarPage />} />
+
+            {/* Event editor — create or edit mode */}
+            <Route path="/calendar/events/:id" element={<EventEditorPage />} />
           </Routes>
         </main>
       </div>
