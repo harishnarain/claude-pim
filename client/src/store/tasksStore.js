@@ -236,8 +236,23 @@ export const useTasksStore = create((set, get) => ({
   /**
    * Create a new task via the API, then prepend it to the tasks list.
    * Re-derives `displayedTasks` after the update.
-   * @param {object} data - camelCase task fields (title required).
-   * @returns {Promise<object>} The newly created task object.
+   *
+   * The `data` object is forwarded to `api/tasks.js#createTask`, which runs it
+   * through `toSnake` before sending and `toCamel` on the response — so all
+   * keys entering and leaving the store are camelCase.
+   *
+   * @param {object}  data           - camelCase task fields.
+   * @param {string}  data.title     - Task title (required).
+   * @param {string}  [data.body]    - Rich-text body.
+   * @param {string}  [data.dueDate] - ISO date string (YYYY-MM-DD), e.g. '2026-06-01'.
+   * @param {string}  [data.dueTime] - 24-hour time string (HH:MM), e.g. '10:00'. Stored
+   *                                   as `due_time` in the database; returned as `dueTime`
+   *                                   on the object resolved by this function.
+   * @param {string}  [data.priority]  - 'High' | 'Medium' | 'Low'.
+   * @param {string}  [data.status]    - Task status string.
+   * @param {boolean} [data.isPinned]  - Whether the task is pinned.
+   * @param {Array}   [data.tags]      - Array of tag name strings or `{id, name}` objects.
+   * @returns {Promise<object>} The newly created camelCase task object (includes `dueTime`).
    */
   createTask: async (data) => {
     set({ isLoading: true, error: null });
@@ -263,10 +278,25 @@ export const useTasksStore = create((set, get) => ({
    * On success: sets `isSaving = false`, `saveStatus = 'saved'`, then schedules
    * a reset to `saveStatus = 'idle'` after 2 seconds.
    * On error: sets `isSaving = false` and `saveStatus = 'error'`.
-   * Also updates selectedTask if it matches the updated ID.
-   * @param {number} id   - The task ID to update.
-   * @param {object} data - Partial camelCase task fields to update.
-   * @returns {Promise<object>} The updated task object.
+   * Also updates `selectedTask` in state if its ID matches the updated ID.
+   *
+   * The `data` object is forwarded to `api/tasks.js#updateTask`, which runs it
+   * through `toSnake` before sending and `toCamel` on the response — so all
+   * keys entering and leaving the store are camelCase.
+   *
+   * @param {number}  id             - The task ID to update.
+   * @param {object}  data           - Partial camelCase task fields to update.
+   * @param {string}  [data.title]   - Task title.
+   * @param {string}  [data.body]    - Rich-text body.
+   * @param {string}  [data.dueDate] - ISO date string (YYYY-MM-DD), e.g. '2026-06-01'.
+   * @param {string}  [data.dueTime] - 24-hour time string (HH:MM), e.g. '10:00'. Sent as
+   *                                   `due_time` to the API; the resolved object contains
+   *                                   `dueTime`. Pass `null` to clear the time.
+   * @param {string}  [data.priority]  - 'High' | 'Medium' | 'Low'.
+   * @param {string}  [data.status]    - Task status string.
+   * @param {boolean} [data.isPinned]  - Whether the task is pinned.
+   * @param {Array}   [data.tags]      - Array of tag name strings or `{id, name}` objects.
+   * @returns {Promise<object>} The updated camelCase task object (includes `dueTime`).
    */
   updateTask: async (id, data) => {
     set({ isSaving: true, saveStatus: 'saving', error: null });
