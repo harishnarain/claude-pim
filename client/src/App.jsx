@@ -10,6 +10,9 @@
  *   /notes           → NotesPage (list view)
  *   /notes/new       → NoteEditorPage in create mode
  *   /notes/:id       → NoteEditorPage for an existing note
+ *   /tasks           → TasksPage (list view)
+ *   /tasks/new       → TaskEditorPage in create mode
+ *   /tasks/:id       → TaskEditorPage for an existing task
  */
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -18,6 +21,8 @@ import ContactsPage from './pages/ContactsPage.jsx';
 import ContactDetailPage from './pages/ContactDetailPage.jsx';
 import NotesPage from './pages/NotesPage.jsx';
 import NoteEditorPage from './pages/NoteEditorPage.jsx';
+import TasksPage from './pages/TasksPage.jsx';
+import TaskEditorPage from './pages/TaskEditorPage.jsx';
 
 /**
  * App — root component wrapping the entire PIM UI.
@@ -48,6 +53,15 @@ function App() {
 
             {/* Note editor — edit mode */}
             <Route path="/notes/:id" element={<NoteEditorPage />} />
+
+            {/* Tasks list view */}
+            <Route path="/tasks" element={<TasksPage />} />
+
+            {/* Task editor — create mode */}
+            <Route path="/tasks/new" element={<TaskEditorPage />} />
+
+            {/* Task editor — edit mode */}
+            <Route path="/tasks/:id" element={<TaskEditorPage />} />
           </Routes>
         </main>
       </div>
