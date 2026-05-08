@@ -82,29 +82,37 @@ function _deriveDisplayed(tasks, sortKey, statusFilter, priorityFilter) {
 
   /**
    * Return a comparator for the given sort key.
+   * Ties are broken by id descending (most recently created first) so equal-key
+   * tasks always appear in a stable, predictable order.
    * @param {string} key - Sort key string.
    * @returns {(a: object, b: object) => number} Comparator function.
    */
   function comparator(key) {
+    const tiebreak = (a, b) => b.id - a.id;
+
     if (key === 'due_asc') {
       return (a, b) => {
         const da = a.dueDate ?? '9999-12-31';
         const db = b.dueDate ?? '9999-12-31';
-        return da < db ? -1 : da > db ? 1 : 0;
+        return da < db ? -1 : da > db ? 1 : tiebreak(a, b);
       };
     }
     if (key === 'due_desc') {
       return (a, b) => {
         const da = a.dueDate ?? '0000-01-01';
         const db = b.dueDate ?? '0000-01-01';
-        return da > db ? -1 : da < db ? 1 : 0;
+        return da > db ? -1 : da < db ? 1 : tiebreak(a, b);
       };
     }
-    if (key === 'priority_asc') {
-      return (a, b) => _priorityRank(a.priority) - _priorityRank(b.priority);
+    if (key === 'priority_desc') {
+      return (a, b) =>
+        _priorityRank(a.priority) - _priorityRank(b.priority) || tiebreak(a, b);
     }
     // default: updated_desc
-    return (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt);
+    return (a, b) => {
+      const diff = new Date(b.updatedAt) - new Date(a.updatedAt);
+      return diff !== 0 ? diff : tiebreak(a, b);
+    };
   }
 
   // 4. Sort each bucket

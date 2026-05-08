@@ -136,9 +136,9 @@ describe('initial state', () => {
   });
 
   it('initialises sortKey from localStorage when a value is present', () => {
-    localStorageMock.setItem('tasks_sort', 'priority_asc');
-    useTasksStore.getState().setSortKey('priority_asc');
-    expect(localStorageMock.getItem('tasks_sort')).toBe('priority_asc');
+    localStorageMock.setItem('tasks_sort', 'priority_desc');
+    useTasksStore.getState().setSortKey('priority_desc');
+    expect(localStorageMock.getItem('tasks_sort')).toBe('priority_desc');
   });
 
   it('initialises statusFilter from localStorage when a value is present', () => {
@@ -462,10 +462,10 @@ describe('fetchTaskTags', () => {
 
 describe('setSortKey', () => {
   it('updates sortKey and persists to localStorage', () => {
-    useTasksStore.getState().setSortKey('priority_asc');
+    useTasksStore.getState().setSortKey('priority_desc');
 
-    expect(useTasksStore.getState().sortKey).toBe('priority_asc');
-    expect(localStorageMock.getItem('tasks_sort')).toBe('priority_asc');
+    expect(useTasksStore.getState().sortKey).toBe('priority_desc');
+    expect(localStorageMock.getItem('tasks_sort')).toBe('priority_desc');
   });
 
   it('re-derives displayedTasks from existing tasks without an API call', () => {
@@ -639,13 +639,13 @@ describe('displayedTasks derivation', () => {
     expect(displayedTasks[2].id).toBe(1); // null treated as far past
   });
 
-  it('sorts by priority High → Medium → Low (priority_asc)', () => {
+  it('sorts by priority High → Medium → Low (priority_desc)', () => {
     const low = makeTask({ id: 1, priority: 'Low' });
     const high = makeTask({ id: 2, priority: 'High' });
     const medium = makeTask({ id: 3, priority: 'Medium' });
 
     useTasksStore.setState({ tasks: [low, high, medium] });
-    useTasksStore.getState().setSortKey('priority_asc');
+    useTasksStore.getState().setSortKey('priority_desc');
 
     const { displayedTasks } = useTasksStore.getState();
     expect(displayedTasks[0].id).toBe(2); // High
