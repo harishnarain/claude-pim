@@ -11,7 +11,7 @@
 **Name:** PIM — Personal Information Manager  
 **Goal:** A web-based application for managing contacts, notes, tasks, and calendar events in one unified interface.  
 **Audience:** Solo users who want a private, fast, self-hosted alternative to fragmented productivity tools.  
-**Status:** Phase 1 — Contacts Module (active)
+**Status:** Phase 5 — Search Module (next)
 
 ---
 
@@ -225,7 +225,7 @@ git reset --hard HEAD~1   # undo the commit on main
 | 1     | Contacts    | ✅ Complete    | `.claudedoc/contacts/`  |
 | 2     | Notes       | ✅ Complete    | `.claudedoc/notes/`     |
 | 3     | Tasks       | ✅ Complete    | `.claudedoc/tasks/`     |
-| 4     | Calendar    | ⬜ Not Started | —                        |
+| 4     | Calendar    | ✅ Complete    | `.claudedoc/calendar/`  |
 | 5     | Search      | ⬜ Not Started | —                        |
 
 ---
