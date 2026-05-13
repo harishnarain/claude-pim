@@ -38,6 +38,9 @@ const MAX_TAG_NAME_LENGTH = 30;
 /** ISO-8601 date pattern (YYYY-MM-DD). */
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
+/** HH:MM time pattern (24-hour). */
+const TIME_PATTERN = /^\d{2}:\d{2}$/;
+
 /**
  * Build a successful response envelope.
  * @param {unknown} data - The response payload.
@@ -103,13 +106,14 @@ function isValidDate(value) {
  * @param {unknown} [fields.title] - Task title.
  * @param {unknown} [fields.body] - Task body.
  * @param {unknown} [fields.due_date] - Due date in YYYY-MM-DD format.
+ * @param {unknown} [fields.due_time] - Due time in HH:MM (24-hour) format.
  * @param {unknown} [fields.priority] - Priority enum value.
  * @param {unknown} [fields.status] - Status enum value.
  * @param {unknown} [fields.tags] - Array of tag name strings.
  * @param {boolean} [requireTitle=false] - Whether title is required (POST vs PATCH).
  * @returns {Record<string, string>} Map of field name to error message.
  */
-function validateTaskFields({ title, body, due_date, priority, status, tags }, requireTitle = false) {
+function validateTaskFields({ title, body, due_date, due_time, priority, status, tags }, requireTitle = false) {
   const errors = {};
 
   if (requireTitle) {
@@ -137,6 +141,19 @@ function validateTaskFields({ title, body, due_date, priority, status, tags }, r
   if (due_date !== undefined && due_date !== null) {
     if (typeof due_date !== 'string' || !isValidDate(due_date)) {
       errors.due_date = 'must be a valid date in YYYY-MM-DD format';
+    }
+  }
+
+  if (due_time !== undefined && due_time !== null) {
+    if (typeof due_time !== 'string' || !TIME_PATTERN.test(due_time)) {
+      errors.due_time = 'must be a valid time in HH:MM (24-hour) format';
+    } else {
+      const [hourStr, minuteStr] = due_time.split(':');
+      const hour = Number(hourStr);
+      const minute = Number(minuteStr);
+      if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+        errors.due_time = 'must be a valid time in HH:MM (24-hour) format';
+      }
     }
   }
 
@@ -223,16 +240,16 @@ router.get('/:id', (req, res) => {
  * Returns 201 with the full task object including tags.
  */
 router.post('/', (req, res) => {
-  const { title, body, due_date, priority, status, is_pinned, tags } = req.body ?? {};
+  const { title, body, due_date, due_time, priority, status, is_pinned, tags } = req.body ?? {};
 
-  const errors = validateTaskFields({ title, body, due_date, priority, status, tags }, true);
+  const errors = validateTaskFields({ title, body, due_date, due_time, priority, status, tags }, true);
 
   if (Object.keys(errors).length > 0) {
     logger.warn('POST /api/tasks — validation error');
     return res.status(422).json(fail('VALIDATION_ERROR', errors));
   }
 
-  const task = Task.create({ title, body, due_date, priority, status, is_pinned });
+  const task = Task.create({ title, body, due_date, due_time, priority, status, is_pinned });
 
   const tagNames = Array.isArray(tags) ? tags.map((t) => t.toLowerCase().trim()) : [];
   TaskTag.syncTaskTags(task.id, tagNames);
@@ -261,12 +278,13 @@ router.patch('/:id', (req, res) => {
     return res.status(404).json(fail('NOT_FOUND'));
   }
 
-  const { title, body, due_date, priority, status, is_pinned, tags } = req.body ?? {};
+  const { title, body, due_date, due_time, priority, status, is_pinned, tags } = req.body ?? {};
 
   const errors = validateTaskFields({
     title: title !== undefined ? title : undefined,
     body: body !== undefined ? body : undefined,
     due_date: due_date !== undefined ? due_date : undefined,
+    due_time: due_time !== undefined ? due_time : undefined,
     priority: priority !== undefined ? priority : undefined,
     status: status !== undefined ? status : undefined,
     tags: tags !== undefined ? tags : undefined,
@@ -281,6 +299,7 @@ router.patch('/:id', (req, res) => {
   if (title !== undefined) updateFields.title = title;
   if (body !== undefined) updateFields.body = body;
   if (due_date !== undefined) updateFields.due_date = due_date;
+  if (due_time !== undefined) updateFields.due_time = due_time;
   if (priority !== undefined) updateFields.priority = priority;
   if (status !== undefined) updateFields.status = status;
   if (is_pinned !== undefined) updateFields.is_pinned = is_pinned;

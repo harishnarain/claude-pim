@@ -1,16 +1,22 @@
 /**
  * TaskForm — controlled form for editing all task fields.
  *
- * Renders five controlled inputs: title (text), body (textarea), dueDate
- * (date), priority (select), and status (select). Character counters are shown
- * below the title and body fields. The counter turns red when the field is at
- * its character limit. An inline validation error is shown when the title is
- * empty. Tags are NOT part of this form — they are managed separately by
- * TagCombobox in TaskEditorPage.
+ * Renders six controlled inputs: title (text), body (textarea), dueDate
+ * (date), dueTime (time, shown only when dueDate is non-empty), priority
+ * (select), and status (select). Character counters are shown below the title
+ * and body fields. The counter turns red when the field is at its character
+ * limit. An inline validation error is shown when the title is empty. Tags are
+ * NOT part of this form — they are managed separately by TagCombobox in
+ * TaskEditorPage.
  *
  * On every field change, `onChange` is called with an object containing only
  * the changed field (`{ fieldName: newValue }`). `onBlur` is called whenever
  * any field loses focus (used by the parent to flush the auto-save debounce).
+ *
+ * NOTE: When `dueDate` is cleared (set to `''`), the Due Time input disappears
+ * automatically. The parent's `handleFormChange` is responsible for clearing
+ * `dueTime` (i.e. calling `onChange({ dueTime: '' })`) whenever `dueDate` is
+ * cleared, so that stale time values are not persisted.
  *
  * @param {object}   props
  * @param {object}   props.task       - Camelcase task object, or null on first render.
@@ -61,6 +67,7 @@ function TaskForm({ task, onChange, onBlur }) {
   const title = task?.title ?? '';
   const body = task?.body ?? '';
   const dueDate = task?.dueDate ?? '';
+  const dueTime = task?.dueTime ?? '';
   const priority = task?.priority ?? 'Low';
   const status = task?.status ?? 'Not Started';
 
@@ -160,6 +167,27 @@ function TaskForm({ task, onChange, onBlur }) {
           className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
+
+      {/* Due Time — only visible when a due date has been selected */}
+      {dueDate !== '' && (
+        <div>
+          <label
+            htmlFor="task-due-time"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Due Time
+          </label>
+          <input
+            id="task-due-time"
+            type="time"
+            value={dueTime}
+            aria-label="Due time"
+            onChange={(e) => handleChange('dueTime', e.target.value)}
+            onBlur={onBlur}
+            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      )}
 
       {/* Priority */}
       <div>

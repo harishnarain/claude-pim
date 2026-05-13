@@ -22,6 +22,7 @@ const DEFAULT_TASK = {
   title: 'Buy groceries',
   body: 'Milk, eggs, bread',
   dueDate: '2026-06-01',
+  dueTime: '09:00',
   priority: 'Medium',
   status: 'Not Started',
 };
@@ -312,5 +313,53 @@ describe('title validation error', () => {
     // task=null means title defaults to '', but the error should still appear.
     renderForm({ task: null });
     expect(screen.getByText(/title is required/i)).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Due Time — conditional rendering and interaction
+// ---------------------------------------------------------------------------
+
+describe('Due Time input', () => {
+  it('renders the due time input when dueDate is non-empty', () => {
+    renderForm();
+    expect(screen.getByLabelText(/due time/i)).toBeInTheDocument();
+  });
+
+  it('does not render the due time input when dueDate is empty', () => {
+    renderForm({ task: { ...DEFAULT_TASK, dueDate: '' } });
+    expect(screen.queryByLabelText(/due time/i)).not.toBeInTheDocument();
+  });
+
+  it('does not render the due time input when task is null (dueDate defaults to empty)', () => {
+    renderForm({ task: null });
+    expect(screen.queryByLabelText(/due time/i)).not.toBeInTheDocument();
+  });
+
+  it('displays the task dueTime value', () => {
+    renderForm({ task: { ...DEFAULT_TASK, dueTime: '14:30' } });
+    expect(screen.getByLabelText(/due time/i)).toHaveValue('14:30');
+  });
+
+  it('defaults dueTime to empty string when task.dueTime is undefined', () => {
+    const taskWithoutTime = { ...DEFAULT_TASK };
+    delete taskWithoutTime.dueTime;
+    renderForm({ task: taskWithoutTime });
+    expect(screen.getByLabelText(/due time/i)).toHaveValue('');
+  });
+
+  it('calls onChange with { dueTime } when the time input changes', () => {
+    const { onChange } = renderForm();
+    fireEvent.change(screen.getByLabelText(/due time/i), {
+      target: { value: '08:45' },
+    });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith({ dueTime: '08:45' });
+  });
+
+  it('calls onBlur when the due time input loses focus', () => {
+    const { onBlur } = renderForm();
+    fireEvent.blur(screen.getByLabelText(/due time/i));
+    expect(onBlur).toHaveBeenCalledTimes(1);
   });
 });
