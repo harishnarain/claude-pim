@@ -13,6 +13,7 @@ import tagsRouter from './routes/tags.js';
 import tasksRouter from './routes/tasks.js';
 import taskTagsRouter from './routes/task-tags.js';
 import eventsRouter from './routes/events.js';
+import searchRouter from './routes/search.js';
 
 const PORT = process.env.PORT ?? 3001;
 
@@ -37,6 +38,9 @@ app.use('/api/task-tags', taskTagsRouter);
 
 // Events REST API routes.
 app.use('/api/events', eventsRouter);
+
+// Search REST API routes.
+app.use('/api/search', searchRouter);
 
 // Health-check endpoint — verifies server and DB are reachable.
 app.get('/api/health', (_req, res) => {
