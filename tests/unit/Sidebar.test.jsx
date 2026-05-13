@@ -220,11 +220,6 @@ describe('Sidebar layout', () => {
     mockIsActive = false;
   });
 
-  it('renders the PIM brand label', () => {
-    renderSidebar();
-    expect(screen.getByText('PIM')).toBeInTheDocument();
-  });
-
   it('has a navigation landmark', () => {
     renderSidebar();
     expect(screen.getByRole('navigation')).toBeInTheDocument();

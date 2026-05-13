@@ -140,7 +140,6 @@ function navLinkClass({ isActive }) {
 function Sidebar() {
   return (
     <aside className="flex h-full w-56 flex-col border-r border-gray-200 bg-white px-3 py-6">
-      <span className="mb-6 px-3 text-xl font-bold text-gray-900">PIM</span>
       <nav aria-label="Main navigation">
         <ul className="space-y-1">
           {NAV_LINKS.map(({ label, to, end, icon }) => (
