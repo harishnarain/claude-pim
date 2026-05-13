@@ -39,7 +39,7 @@ function formatTime(timeStr) {
 }
 
 /**
- * Inline SVG of an unchecked checkbox square used as the task indicator icon.
+ * Inline SVG of an unchecked checkbox square used for open tasks.
  *
  * @returns {JSX.Element}
  */
@@ -55,19 +55,36 @@ function CheckboxIcon() {
       xmlns="http://www.w3.org/2000/svg"
       className="mt-px shrink-0"
     >
-      <rect
-        x="0.5"
-        y="0.5"
-        width="9"
-        height="9"
-        rx="1.5"
-        stroke="#60a5fa"
-        strokeWidth="1"
-        fill="none"
-      />
+      <rect x="0.5" y="0.5" width="9" height="9" rx="1.5" stroke="#60a5fa" strokeWidth="1" fill="none" />
     </svg>
   );
 }
+
+/**
+ * Inline SVG of a filled checkbox with a checkmark used for completed/cancelled tasks.
+ *
+ * @returns {JSX.Element}
+ */
+function CheckedIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      focusable="false"
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="mt-px shrink-0"
+    >
+      <rect x="0" y="0" width="10" height="10" rx="2" fill="#9ca3af" />
+      <polyline points="2,5 4,7.5 8,3" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/** Statuses that are considered done and should render with a muted/struck appearance. */
+const DONE_STATUSES = new Set(['Completed', 'Cancelled']);
 
 /**
  * TaskChip — white chip with a left-side blue border that renders a task.
@@ -78,15 +95,16 @@ function CheckboxIcon() {
  * @param {string}   props.task.title       - Task title.
  * @param {string}   [props.task.dueDate]   - Due date string (ISO date or similar).
  * @param {string}   [props.task.dueTime]   - Due time string in "HH:MM" format.
- * @param {string}   [props.task.status]    - Task status (e.g. "open", "done").
- * @param {string}   [props.task.priority]  - Task priority (e.g. "low", "high").
+ * @param {string}   [props.task.status]    - Task status (e.g. "Not Started", "Completed").
+ * @param {string}   [props.task.priority]  - Task priority (e.g. "Low", "High").
  * @param {object}   [props.style]          - Inline style object spread onto the root for overlap positioning.
  * @param {Function} props.onClick          - Called when the chip is clicked or activated by keyboard.
  * @returns {JSX.Element}
  */
 function TaskChip({ task, style, onClick }) {
-  const { title, dueTime } = task;
+  const { title, dueTime, status } = task;
 
+  const isDone = DONE_STATUSES.has(status);
   const formattedTime = dueTime ? formatTime(dueTime) : null;
 
   /**
@@ -108,19 +126,27 @@ function TaskChip({ task, style, onClick }) {
       style={style}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className="flex cursor-pointer flex-col overflow-hidden rounded border-l-4 border-blue-400 bg-white px-1.5 py-0.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1"
+      className={`flex cursor-pointer flex-col overflow-hidden rounded border-l-4 bg-white px-1.5 py-0.5 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 ${
+        isDone
+          ? 'border-gray-300 opacity-60 focus:ring-gray-300'
+          : 'border-blue-400 focus:ring-blue-400'
+      }`}
     >
       {/* Title row with checkbox icon */}
       <span className="flex items-start gap-1 truncate">
-        <CheckboxIcon />
-        <span className="truncate text-xs font-semibold leading-tight text-gray-800">
+        {isDone ? <CheckedIcon /> : <CheckboxIcon />}
+        <span
+          className={`truncate text-xs font-semibold leading-tight ${
+            isDone ? 'text-gray-400 line-through' : 'text-gray-800'
+          }`}
+        >
           {title}
         </span>
       </span>
 
       {/* Formatted time — timed tasks only */}
       {formattedTime && (
-        <span className="truncate text-xs leading-tight text-gray-500">
+        <span className={`truncate text-xs leading-tight ${isDone ? 'text-gray-400' : 'text-gray-500'}`}>
           {formattedTime}
         </span>
       )}
