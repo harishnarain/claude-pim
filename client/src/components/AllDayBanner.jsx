@@ -4,7 +4,7 @@
  * Displays all-day calendar events and timeless tasks (tasks that have a dueDate
  * but no dueTime) in column slots that correspond to the dates visible in the
  * current view. Each column aligns with a DayColumn, and a fixed-width left
- * spacer (w-12 / 48 px) matches the TimeColumn width so the banner columns
+ * spacer (w-16 / 64 px) matches the TimeColumn width so the banner columns
  * stay in alignment with the timed grid below.
  *
  * Items are filtered per-column: for a given column date, the banner renders
@@ -93,8 +93,8 @@ function AllDayBanner({ columns, items, onEventClick, onTaskClick, onEventDelete
       className="sticky top-0 z-10 flex min-h-[2rem] border-b border-gray-200 bg-white"
       aria-label="All-day events"
     >
-      {/* Left spacer — aligns with the TimeColumn (w-12 = 48 px) */}
-      <div className="w-12 flex-none border-r border-gray-200" aria-hidden="true" />
+      {/* Left spacer — aligns with the TimeColumn (w-16 = 64 px) */}
+      <div className="w-16 flex-none border-r border-gray-200" aria-hidden="true" />
 
       {/* One slot per column */}
       {columns.map((columnDate) => {

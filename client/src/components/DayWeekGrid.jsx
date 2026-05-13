@@ -79,6 +79,9 @@ function DayWeekGrid({ columns, items, onSlotClick, onEventClick, onTaskClick, o
   /** Ref attached to the scrollable container so we can imperatively set scrollTop. */
   const scrollRef = useRef(null);
 
+  /** Today's ISO date string used to highlight the current day header. */
+  const todayStr = toLocalDateStr(new Date());
+
   /**
    * Scroll the timed grid to 08:00 on initial mount.
    * Uses a ref to avoid triggering re-renders.
@@ -91,6 +94,32 @@ function DayWeekGrid({ columns, items, onSlotClick, onEventClick, onTaskClick, o
 
   return (
     <div className="flex flex-col overflow-hidden">
+      {/* Day header row — shows abbreviated weekday name and date number per column */}
+      <div className="flex shrink-0 border-b border-gray-200 bg-white">
+        {/* Spacer matching TimeColumn width (w-16) */}
+        <div className="w-16 flex-none border-r border-gray-200" />
+        {(columns ?? []).map((columnDate) => {
+          const dateStr = toLocalDateStr(columnDate);
+          const isToday = dateStr === todayStr;
+          const dayAbbr = columnDate.toLocaleDateString('en-US', { weekday: 'short' });
+          const dayNum = columnDate.getDate();
+          return (
+            <div key={dateStr} className="flex flex-1 flex-col items-center border-r border-gray-200 py-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                {dayAbbr}
+              </span>
+              <span
+                className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${
+                  isToday ? 'bg-blue-600 text-white' : 'text-gray-900'
+                }`}
+              >
+                {dayNum}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
       {/* All-day / timeless-task banner — sticky at the top of the grid */}
       <AllDayBanner
         columns={columns}
