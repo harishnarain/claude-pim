@@ -80,8 +80,10 @@ function isValidDate(value) {
 
 /**
  * Convert a snake_case event row from the database to a camelCase response object.
- * @param {{ id: number, title: string, description: string|null, location: string|null, all_day: number, start_at: string, end_at: string, color: string, created_at: string, updated_at: string }} row - Raw DB row.
- * @returns {{ id: number, title: string, description: string|null, location: string|null, allDay: number, startAt: string, endAt: string, color: string, createdAt: string, updatedAt: string }} camelCase event object.
+ * SQLite stores booleans as 0/1 integers; allDay is coerced to a JS boolean here
+ * so callers can use strict equality checks without surprises.
+ * @param {{ id: number, title: string, description: string|null, location: string|null, all_day: number, start_at: string, end_at: string|null, color: string, created_at: string, updated_at: string }} row - Raw DB row.
+ * @returns {{ id: number, title: string, description: string|null, location: string|null, allDay: boolean, startAt: string, endAt: string|null, color: string, createdAt: string, updatedAt: string }} camelCase event object.
  */
 function toCamelEvent(row) {
   return {
@@ -89,7 +91,7 @@ function toCamelEvent(row) {
     title: row.title,
     description: row.description,
     location: row.location,
-    allDay: row.all_day,
+    allDay: Boolean(row.all_day),
     startAt: row.start_at,
     endAt: row.end_at,
     color: row.color,

@@ -1,7 +1,7 @@
 /**
  * Frontend API client for the /api/events resource.
- * Thin wrapper around fetch that converts snake_case API fields to camelCase
- * and camelCase inputs back to snake_case before sending.
+ * Thin wrapper around fetch. The server API already returns camelCase fields;
+ * these mappers re-shape the envelope into the exact shape the frontend uses.
  * The GET /api/events endpoint returns a merged array of events and tasks;
  * each item is routed through the appropriate converter based on its `kind` field.
  * Throws an Error with a descriptive message on any non-2xx response.
@@ -12,10 +12,11 @@
 const BASE_URL = '/api/events';
 
 /**
- * Convert a snake_case event object from the API into a camelCase object
- * for use in the frontend.
- * @param {object} event - Raw event object from the API response.
- * @returns {object} Event object with camelCase keys.
+ * Map an event object from the API response envelope into the frontend shape.
+ * The server already returns camelCase keys; this function selects the fields
+ * used by the frontend and discards anything else.
+ * @param {object} event - Event object from the API response (camelCase keys).
+ * @returns {object} Event object with the frontend-expected shape.
  */
 function toCamelEvent(event) {
   return {
@@ -24,19 +25,20 @@ function toCamelEvent(event) {
     description: event.description,
     location: event.location,
     color: event.color,
-    allDay: event.all_day,
-    startAt: event.start_at,
-    endAt: event.end_at,
-    createdAt: event.created_at,
-    updatedAt: event.updated_at,
+    allDay: event.allDay,
+    startAt: event.startAt,
+    endAt: event.endAt,
+    createdAt: event.createdAt,
+    updatedAt: event.updatedAt,
   };
 }
 
 /**
- * Convert a snake_case task chip object from the API into a camelCase object
- * for use in the calendar view. Adds `kind: 'task'` to distinguish it from events.
- * @param {object} task - Raw task chip object from the API response.
- * @returns {object} Task chip object with camelCase keys and `kind` set to `'task'`.
+ * Map a task chip object from the API response envelope into the frontend shape.
+ * The server already returns camelCase keys. Adds `kind: 'task'` so calendar
+ * components can distinguish task chips from event chips.
+ * @param {object} task - Task chip object from the API response (camelCase keys).
+ * @returns {object} Task chip object with the frontend-expected shape.
  */
 function toCamelTask(task) {
   return {
@@ -44,19 +46,19 @@ function toCamelTask(task) {
     title: task.title,
     status: task.status,
     priority: task.priority,
-    dueDate: task.due_date,
-    dueTime: task.due_time,
-    isPinned: task.is_pinned,
+    dueDate: task.dueDate,
+    dueTime: task.dueTime,
+    isPinned: task.isPinned,
     kind: 'task',
   };
 }
 
 /**
- * Convert a camelCase event input object into a snake_case object
- * suitable for sending to the API. Only includes keys that are defined
- * in the input to support partial PATCH requests.
+ * Build the request body for POST/PATCH /api/events from a camelCase event object.
+ * The server accepts camelCase keys; only defined keys are included so PATCH
+ * requests are partial (sparse update).
  * @param {object} event - Event data with camelCase keys.
- * @returns {object} Event object with snake_case keys (only defined keys included).
+ * @returns {object} Request body with camelCase keys (only defined keys included).
  */
 function toSnakeEvent(event) {
   const result = {};
@@ -64,9 +66,9 @@ function toSnakeEvent(event) {
   if (event.description !== undefined) result.description = event.description;
   if (event.location !== undefined) result.location = event.location;
   if (event.color !== undefined) result.color = event.color;
-  if (event.allDay !== undefined) result.all_day = event.allDay;
-  if (event.startAt !== undefined) result.start_at = event.startAt;
-  if (event.endAt !== undefined) result.end_at = event.endAt;
+  if (event.allDay !== undefined) result.allDay = event.allDay;
+  if (event.startAt !== undefined) result.startAt = event.startAt;
+  if (event.endAt !== undefined) result.endAt = event.endAt;
   return result;
 }
 
