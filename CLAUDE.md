@@ -226,7 +226,8 @@ git reset --hard HEAD~1   # undo the commit on main
 | 2     | Notes       | ✅ Complete    | `.claudedoc/notes/`     |
 | 3     | Tasks       | ✅ Complete    | `.claudedoc/tasks/`     |
 | 4     | Calendar    | ✅ Complete    | `.claudedoc/calendar/`  |
-| 5     | Search      | ⬜ Not Started | —                        |
+| 5     | Search      | ✅ Complete    | `.claudedoc/search/`    |
+| —     | Seed        | ✅ Complete    | `.claudedoc/seed/`      |
 
 ---
 
