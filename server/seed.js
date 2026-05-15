@@ -889,9 +889,98 @@ function seedTasks(db) {
 }
 
 /**
+ * Add a number of minutes to a datetime string formatted as 'YYYY-MM-DD HH:MM:SS'.
+ * @param {string} datetimeStr - Datetime in 'YYYY-MM-DD HH:MM:SS' format (UTC).
+ * @param {number} minutes - Number of minutes to add.
+ * @returns {string} New datetime string in 'YYYY-MM-DD HH:MM:SS' format (UTC).
+ */
+function addMinutes(datetimeStr, minutes) {
+  const d = new Date(datetimeStr.replace(' ', 'T') + 'Z');
+  d.setUTCMinutes(d.getUTCMinutes() + minutes);
+  return d.toISOString().replace('T', ' ').slice(0, 19);
+}
+
+/**
+ * Insert exactly 20 date-relative calendar events into the events table.
+ * Step 1: Insert one Daily Standup for each weekday (Mon–Fri) in the ±7-day
+ * window (offsets −7 through +7 inclusive).
+ * Step 2: Fill the remaining slots up to 20 using a fixed list of event
+ * templates, taken in order.
+ * @param {import('better-sqlite3').Database} db - The open database instance.
+ * @returns {void}
+ */
+function seedEvents(db) {
+  const insert = db.prepare(`
+    INSERT INTO events (title, description, location, all_day, start_at, end_at, color)
+    VALUES (@title, @description, @location, @all_day, @start_at, @end_at, @color)
+  `);
+
+  // --- Step 1: Daily Standups on weekdays within ±7-day window ---
+  const OFFSETS = [];
+  for (let offset = -7; offset <= 7; offset++) {
+    OFFSETS.push(offset);
+  }
+
+  let standupCount = 0;
+  for (const offset of OFFSETS) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + offset);
+    const weekday = d.getUTCDay(); // 0 = Sun, 6 = Sat
+    if (weekday >= 1 && weekday <= 5) {
+      const start_at = isoDateTime(offset, 9, 30);
+      insert.run({
+        title: 'Daily Standup',
+        description: null,
+        location: 'Zoom',
+        all_day: 0,
+        start_at,
+        end_at: isoDateTime(offset, 10, 0),
+        color: 'blue',
+      });
+      standupCount++;
+    }
+  }
+  logger.info(`Seeded ${standupCount} Daily Standup events`);
+
+  // --- Step 2: Static event templates to fill remaining slots up to 20 ---
+  const templates = [
+    { title: 'Sprint Planning',              offset: -6, startHour: 10, startMinute: 0,  durationMinutes: 120, location: 'Conference Room A', description: 'Plan sprint tasks, review backlog, and assign story points.',            color: 'green'  },
+    { title: '1:1 — Engineering Manager',    offset: -5, startHour: 14, startMinute: 0,  durationMinutes: 30,  location: 'Zoom',              description: null,                                                                     color: 'purple' },
+    { title: 'Design Review: Onboarding Flow', offset: -3, startHour: 11, startMinute: 0, durationMinutes: 60, location: 'Conference Room B', description: 'Review updated onboarding screens with the design and product teams.',   color: 'orange' },
+    { title: 'All-Hands Meeting',            offset: -1, startHour: 17, startMinute: 0,  durationMinutes: 60,  location: 'Main Auditorium',   description: 'Company-wide update on Q2 priorities and product roadmap.',            color: 'red'    },
+    { title: 'Architecture Discussion',      offset:  1, startHour: 13, startMinute: 0,  durationMinutes: 60,  location: 'Conference Room A', description: null,                                                                     color: 'blue'   },
+    { title: 'Sprint Retrospective',         offset:  2, startHour: 15, startMinute: 0,  durationMinutes: 90,  location: 'Conference Room A', description: 'Review sprint velocity, blockers, and team feedback.',                  color: 'green'  },
+    { title: 'Customer Demo',                offset:  3, startHour: 10, startMinute: 0,  durationMinutes: 60,  location: 'Zoom',              description: null,                                                                     color: 'orange' },
+    { title: 'Code Review Session',          offset:  4, startHour: 14, startMinute: 0,  durationMinutes: 60,  location: 'Zoom',              description: null,                                                                     color: 'blue'   },
+    { title: 'Quarterly OKR Check-in',       offset:  5, startHour: 11, startMinute: 0,  durationMinutes: 90,  location: 'Board Room',        description: null,                                                                     color: 'purple' },
+    { title: 'On-Call Handoff',              offset:  6, startHour:  9, startMinute: 0,  durationMinutes: 30,  location: 'Zoom',              description: null,                                                                     color: 'red'    },
+    { title: 'Product Roadmap Review',       offset:  7, startHour: 14, startMinute: 0,  durationMinutes: 60,  location: 'Conference Room B', description: null,                                                                     color: 'green'  },
+    { title: 'Team Lunch',                   offset:  0, startHour: 12, startMinute: 0,  durationMinutes: 60,  location: 'The Atrium',        description: null,                                                                     color: 'orange' },
+  ];
+
+  const needed = 20 - standupCount;
+  const selected = templates.slice(0, needed);
+  for (const tmpl of selected) {
+    const start_at = isoDateTime(tmpl.offset, tmpl.startHour, tmpl.startMinute);
+    const end_at = addMinutes(start_at, tmpl.durationMinutes);
+    insert.run({
+      title: tmpl.title,
+      description: tmpl.description,
+      location: tmpl.location,
+      all_day: 0,
+      start_at,
+      end_at,
+      color: tmpl.color,
+    });
+  }
+  logger.info(`Seeded ${selected.length} additional events (total 20)`);
+}
+
+/**
  * Top-level seed entry point.
  * Wraps all seed operations in a single better-sqlite3 transaction.
- * Clears all tables, then seeds contacts, notes with tags, and tasks with tags.
+ * Clears all tables, then seeds contacts, notes with tags, tasks with tags,
+ * and calendar events.
  * @param {import('better-sqlite3').Database} db - The open database instance.
  * @returns {void}
  */
@@ -902,9 +991,10 @@ function runSeed(db) {
     seedContacts(db);
     seedNotes(db);
     seedTasks(db);
-    logger.info('Seed complete');
+    seedEvents(db);
+    logger.info('Seed complete: 20 contacts, 20 notes, 20 tasks, 20 events');
   });
   seed();
 }
 
-export { isoDate, isoDateTime, clearAllTables, runSeed };
+export { isoDate, isoDateTime, addMinutes, clearAllTables, seedEvents, runSeed };
