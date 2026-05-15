@@ -19,7 +19,7 @@
  * @returns {JSX.Element}
  */
 import React from 'react';
-import TypeIcon from '../components/TypeIcon.jsx';
+import TypeIcon from './TypeIcon.jsx';
 
 /**
  * SearchResultItem renders one search result row with icon, title and subtitle.
