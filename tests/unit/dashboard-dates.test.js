@@ -55,6 +55,10 @@ describe('getGreeting()', () => {
     expect(getGreeting(dateAtHour(5))).toBe('Good morning');
   });
 
+  it('returns "Good morning" at 06:00', () => {
+    expect(getGreeting(dateAtHour(6))).toBe('Good morning');
+  });
+
   it('returns "Good morning" at 11:59 (hour 11)', () => {
     const d = new Date();
     d.setHours(11, 59, 0, 0);
@@ -63,6 +67,10 @@ describe('getGreeting()', () => {
 
   it('returns "Good afternoon" at 12:00', () => {
     expect(getGreeting(dateAtHour(12))).toBe('Good afternoon');
+  });
+
+  it('returns "Good afternoon" at 13:00', () => {
+    expect(getGreeting(dateAtHour(13))).toBe('Good afternoon');
   });
 
   it('returns "Good afternoon" at 16:59 (hour 16)', () => {
@@ -75,12 +83,20 @@ describe('getGreeting()', () => {
     expect(getGreeting(dateAtHour(17))).toBe('Good evening');
   });
 
+  it('returns "Good evening" at 20:00', () => {
+    expect(getGreeting(dateAtHour(20))).toBe('Good evening');
+  });
+
   it('returns "Good evening" at 23:00', () => {
     expect(getGreeting(dateAtHour(23))).toBe('Good evening');
   });
 
   it('returns "Good evening" at 00:00 (midnight)', () => {
     expect(getGreeting(dateAtHour(0))).toBe('Good evening');
+  });
+
+  it('returns "Good evening" at 02:00 (early-morning maps to evening)', () => {
+    expect(getGreeting(dateAtHour(2))).toBe('Good evening');
   });
 
   it('returns "Good evening" at 04:59 (hour 4)', () => {
@@ -110,6 +126,13 @@ describe('formatFullDate()', () => {
   it('contains the year 2026 for a 2026 date', () => {
     const result = formatFullDate(new Date('2026-05-15T12:00:00'));
     expect(result).toMatch(/2026/);
+  });
+
+  it('contains "15", "May", and "2026" for 15 May 2026 (locale-safe)', () => {
+    const result = formatFullDate(new Date('2026-05-15T12:00:00'));
+    expect(result).toContain('15');
+    expect(result).toMatch(/May/i);
+    expect(result).toContain('2026');
   });
 
   it('defaults to new Date() when no argument is passed', () => {
@@ -150,6 +173,10 @@ describe('formatEventTime()', () => {
     expect(formatEventTime('2026-05-15T09:30:00')).toBe('09:30');
   });
 
+  it('handles afternoon time with leading-zero minutes', () => {
+    expect(formatEventTime('2026-05-15T14:05:00')).toBe('14:05');
+  });
+
   it('handles midnight correctly', () => {
     expect(formatEventTime('2026-05-15T00:00:00')).toBe('00:00');
   });
@@ -183,6 +210,10 @@ describe('addDays()', () => {
   it('rolls over year boundaries', () => {
     expect(addDays('2026-12-31', 1)).toBe('2027-01-01');
   });
+
+  it('crosses year boundary by multiple days (2026-12-30 + 3 = 2027-01-02)', () => {
+    expect(addDays('2026-12-30', 3)).toBe('2027-01-02');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -196,6 +227,10 @@ describe('formatRelativePastDate()', () => {
 
   it('returns "2 days ago" when 2 days ago', () => {
     expect(formatRelativePastDate('2026-05-13', '2026-05-15')).toBe('2 days ago');
+  });
+
+  it('returns "3 days ago" when 3 days ago', () => {
+    expect(formatRelativePastDate('2026-05-12', '2026-05-15')).toBe('3 days ago');
   });
 
   it('returns "7 days ago" when 7 days ago', () => {
@@ -235,6 +270,13 @@ describe('formatRelativeFutureDate()', () => {
     expect(result).toMatch(/\d+/);   // contains the day number
     expect(result).toMatch(/[A-Za-z]+/); // contains a weekday abbreviation
     expect(result).toContain('20');
+  });
+
+  it('returns a non-empty short weekday+day string when 6 days ahead', () => {
+    const result = formatRelativeFutureDate('2026-05-21', '2026-05-15');
+    // Must be non-empty and match a short-weekday + numeric-day pattern.
+    expect(result.length).toBeGreaterThan(0);
+    expect(result).toMatch(/^\w{3} \d{1,2}$|^\d{1,2} \w{3}$/);
   });
 
   it('returns a short weekday+day string when 7 days ahead', () => {
