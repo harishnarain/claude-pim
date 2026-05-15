@@ -6,7 +6,7 @@
 
 import express from 'express';
 import { getDb, runMigrations } from './db.js';
-import { runSeed } from './seed.js';
+import { runSeed } from './seed/index.js';
 import logger from './logger.js';
 import contactsRouter from './routes/contacts.js';
 import notesRouter from './routes/notes.js';
