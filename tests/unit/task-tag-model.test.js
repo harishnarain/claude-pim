@@ -13,6 +13,9 @@ import { create as createTask } from '../../server/models/task.js';
 beforeEach(() => {
   const db = getDb();
   runMigrations(db);
+  db.prepare('DELETE FROM task_tags').run();
+  db.prepare('DELETE FROM task_tags_vocab').run();
+  db.prepare('DELETE FROM tasks').run();
 });
 
 afterEach(() => {

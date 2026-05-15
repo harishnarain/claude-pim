@@ -6,6 +6,7 @@
 
 import express from 'express';
 import { getDb, runMigrations } from './db.js';
+import { runSeed } from './seed.js';
 import logger from './logger.js';
 import contactsRouter from './routes/contacts.js';
 import notesRouter from './routes/notes.js';
@@ -58,6 +59,7 @@ function start() {
   // Initialise DB connection eagerly on startup and apply pending migrations.
   const db = getDb();
   runMigrations(db);
+  runSeed(db);
 
   const server = app.listen(PORT, () => {
     logger.info(`PIM server listening on port ${PORT}`);
