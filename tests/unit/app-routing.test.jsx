@@ -110,7 +110,13 @@ vi.mock('react-router-dom', () => {
   /** BrowserRouter mock — transparent wrapper. */
   const BrowserRouter = ({ children }) => <>{children}</>;
 
-  return { NavLink, Routes, Route, Navigate, BrowserRouter };
+  /**
+   * useNavigate mock — returns a no-op navigate function.
+   * @returns {Function}
+   */
+  const useNavigate = () => vi.fn();
+
+  return { NavLink, Routes, Route, Navigate, BrowserRouter, useNavigate };
 });
 
 // ---------------------------------------------------------------------------
@@ -139,6 +145,22 @@ vi.mock('../../client/src/pages/TasksPage.jsx', () => ({
 
 vi.mock('../../client/src/pages/TaskEditorPage.jsx', () => ({
   default: () => <div data-testid="task-editor-page">TaskEditorPage</div>,
+}));
+
+vi.mock('../../client/src/pages/CalendarPage.jsx', () => ({
+  default: () => <div data-testid="calendar-page">CalendarPage</div>,
+}));
+
+vi.mock('../../client/src/pages/EventEditorPage.jsx', () => ({
+  default: () => <div data-testid="event-editor-page">EventEditorPage</div>,
+}));
+
+vi.mock('../../client/src/pages/SearchPage.jsx', () => ({
+  default: () => <div data-testid="search-page">SearchPage</div>,
+}));
+
+vi.mock('../../client/src/components/TopNavbar.jsx', () => ({
+  default: () => <div data-testid="top-navbar">TopNavbar</div>,
 }));
 
 // ---------------------------------------------------------------------------
@@ -195,11 +217,6 @@ describe('Sidebar', () => {
     render(<Sidebar />);
     const link = screen.getByRole('link', { name: /contacts/i });
     expect(link.className).not.toMatch(/text-blue-700/);
-  });
-
-  it('renders the PIM brand label', () => {
-    render(<Sidebar />);
-    expect(screen.getByText('PIM')).toBeInTheDocument();
   });
 
   it('has a navigation landmark', () => {

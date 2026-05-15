@@ -13,6 +13,9 @@ import { create as createNote } from '../../server/models/note.js';
 beforeEach(() => {
   const db = getDb();
   runMigrations(db);
+  db.prepare('DELETE FROM note_tags').run();
+  db.prepare('DELETE FROM tags').run();
+  db.prepare('DELETE FROM notes').run();
 });
 
 afterEach(() => {

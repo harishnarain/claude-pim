@@ -6,6 +6,7 @@
 
 import express from 'express';
 import { getDb, runMigrations } from './db.js';
+import { runSeed } from './seed/index.js';
 import logger from './logger.js';
 import contactsRouter from './routes/contacts.js';
 import notesRouter from './routes/notes.js';
@@ -13,6 +14,7 @@ import tagsRouter from './routes/tags.js';
 import tasksRouter from './routes/tasks.js';
 import taskTagsRouter from './routes/task-tags.js';
 import eventsRouter from './routes/events.js';
+import searchRouter from './routes/search.js';
 
 const PORT = process.env.PORT ?? 3001;
 
@@ -38,6 +40,9 @@ app.use('/api/task-tags', taskTagsRouter);
 // Events REST API routes.
 app.use('/api/events', eventsRouter);
 
+// Search REST API routes.
+app.use('/api/search', searchRouter);
+
 // Health-check endpoint — verifies server and DB are reachable.
 app.get('/api/health', (_req, res) => {
   // Touch the DB to confirm the connection is open.
@@ -54,6 +59,7 @@ function start() {
   // Initialise DB connection eagerly on startup and apply pending migrations.
   const db = getDb();
   runMigrations(db);
+  runSeed(db);
 
   const server = app.listen(PORT, () => {
     logger.info(`PIM server listening on port ${PORT}`);
