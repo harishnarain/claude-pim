@@ -66,6 +66,7 @@ const mockSetQuery = vi.fn();
 let mockStoreState = {
   isLoading: false,
   results: [],
+  total: 0,
 };
 
 vi.mock('../../client/src/store/searchStore.js', () => {
@@ -200,14 +201,14 @@ describe('non-empty query — store interactions', () => {
 describe('result count', () => {
   it('shows the correct count when results are present', () => {
     mockSearchParamsState = { q: 'meeting', type: null };
-    mockStoreState = { isLoading: false, results: RESULTS };
+    mockStoreState = { isLoading: false, results: RESULTS, total: RESULTS.length };
     render(<SearchPage />);
     expect(screen.getByText(/4 results/i)).toBeInTheDocument();
   });
 
   it('uses singular "result" when there is exactly one match', () => {
     mockSearchParamsState = { q: 'alice', type: null };
-    mockStoreState = { isLoading: false, results: [RESULTS[0]] };
+    mockStoreState = { isLoading: false, results: [RESULTS[0]], total: 1 };
     render(<SearchPage />);
     expect(screen.getByText(/1 result/i)).toBeInTheDocument();
   });
