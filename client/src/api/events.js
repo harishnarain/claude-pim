@@ -30,6 +30,7 @@ function toCamelEvent(event) {
     endAt: event.endAt,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
+    kind: 'event',
   };
 }
 
