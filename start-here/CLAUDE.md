@@ -1,4 +1,4 @@
-# CLAUDE.md — Personal Information Manager (PIM)
+# CLAUDE.md — [Your Project Name]
 # Project Constitution · Version 1.0
 
 > This file is the single source of truth for all agents and sessions working on this project.
@@ -8,10 +8,10 @@
 
 ## Project Overview
 
-**Name:** PIM — Personal Information Manager  
-**Goal:** A web-based application for managing contacts, notes, tasks, and calendar events in one unified interface.  
-**Audience:** Solo users who want a private, fast, self-hosted alternative to fragmented productivity tools.  
-**Status:** All planned phases complete
+**Name:** [Your Project Name]
+**Goal:** [One sentence describing what this app does and for whom.]
+**Audience:** [Who uses this? Solo users? Small teams?]
+**Status:** Phase 1 — [First Module] (active)
 
 ---
 
@@ -34,10 +34,10 @@
 ## Project Structure
 
 ```
-claude-pim/
+your-project/
 ├── CLAUDE.md                  ← YOU ARE HERE (project constitution)
 ├── .claude/
-│   ├── agents/                ← Sub-agent definitions (SKILL.md files)
+│   ├── agents/                ← Sub-agent definitions
 │   │   ├── requirements.md
 │   │   ├── design.md
 │   │   ├── tasks.md
@@ -49,7 +49,7 @@ claude-pim/
 │   │   └── spec-review.md
 │   └── tasks/                 ← Active task tracking (auto-managed)
 ├── .claudedoc/                ← Spec workspace (one folder per feature)
-│   └── contacts/
+│   └── my-first-feature/
 │       ├── requirements.md
 │       ├── design.md
 │       └── tasks.md
@@ -95,7 +95,7 @@ claude-pim/
 - Database columns: `snake_case`
 
 ### API Design
-- REST endpoints follow: `GET /api/contacts`, `POST /api/contacts`, `PATCH /api/contacts/:id`, `DELETE /api/contacts/:id`
+- REST endpoints follow: `GET /api/items`, `POST /api/items`, `PATCH /api/items/:id`, `DELETE /api/items/:id`
 - All responses: `{ data, error, meta }` envelope
 - Errors always include a `code` string (e.g. `NOT_FOUND`, `VALIDATION_ERROR`)
 - HTTP status codes must be semantically correct
@@ -141,8 +141,8 @@ Every feature follows this pipeline. **No implementation starts without an appro
 
 ## Agent Roster
 
-| Agent          | File                        | Responsibility                                      |
-|----------------|-----------------------------|-----------------------------------------------------|
+| Agent          | File                             | Responsibility                                 |
+|----------------|----------------------------------|------------------------------------------------|
 | Requirements   | `.claude/agents/requirements.md` | Interviews user, writes `requirements.md`      |
 | Design         | `.claude/agents/design.md`       | Writes `design.md` from requirements           |
 | Task           | `.claude/agents/tasks.md`        | Writes `tasks.md` from design                  |
@@ -220,15 +220,9 @@ git reset --hard HEAD~1   # undo the commit on main
 
 ## Current Phase Status
 
-| Phase | Module      | Status      | Spec Location              |
-|-------|-------------|-------------|----------------------------|
-| 1     | Contacts    | ✅ Complete    | `.claudedoc/contacts/`  |
-| 2     | Notes       | ✅ Complete    | `.claudedoc/notes/`     |
-| 3     | Tasks       | ✅ Complete    | `.claudedoc/tasks/`     |
-| 4     | Calendar    | ✅ Complete    | `.claudedoc/calendar/`  |
-| 5     | Search      | ✅ Complete    | `.claudedoc/search/`    |
-| 6     | Dashboard   | ✅ Complete    | `.claudedoc/dashboard/` |
-| —     | Seed        | ✅ Complete    | `.claudedoc/seed/`      |
+| Phase | Module           | Status         | Spec Location                     |
+|-------|------------------|----------------|-----------------------------------|
+| 1     | My First Feature | 🔄 In Progress | `.claudedoc/my-first-feature/`    |
 
 ---
 
@@ -241,7 +235,6 @@ git reset --hard HEAD~1   # undo the commit on main
 - Update the Phase Status table when a phase completes
 - Ask clarifying questions before writing specs or code
 - Make one atomic change at a time; commit before moving on
-- Reference spec files using `@.claudedoc/contacts/requirements.md` syntax
 
 ### DON'T
 - Touch any file before confirming you are on a feature branch
