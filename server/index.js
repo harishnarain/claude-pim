@@ -8,6 +8,7 @@ import express from 'express';
 import { getDb, runMigrations } from './db.js';
 import { runSeed } from './seed/index.js';
 import logger from './logger.js';
+import authenticate from './middleware/auth.js';
 import contactsRouter from './routes/contacts.js';
 import notesRouter from './routes/notes.js';
 import tagsRouter from './routes/tags.js';
@@ -21,6 +22,9 @@ const PORT = process.env.PORT ?? 3001;
 const app = express();
 
 app.use(express.json());
+
+// Auth middleware applied to every /api/* route (passthrough stub until JWT is enabled).
+app.use('/api', authenticate);
 
 // Contacts REST API routes.
 app.use('/api/contacts', contactsRouter);
