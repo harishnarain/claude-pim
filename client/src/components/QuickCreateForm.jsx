@@ -115,9 +115,9 @@ function QuickCreateForm({ initialDate, initialHour, onSave, onExpand, onClose }
     setTitleError('');
 
     if (allDay) {
-      // For all-day events send only the date portion.
+      // Server requires YYYY-MM-DDTHH:MM format even for all-day events.
       const datePart = startAt.slice(0, 10);
-      return { title: title.trim(), allDay: true, startAt: datePart, color };
+      return { title: title.trim(), allDay: true, startAt: `${datePart}T00:00`, endAt: `${datePart}T23:59`, color };
     }
 
     return { title: title.trim(), allDay: false, startAt, endAt, color };

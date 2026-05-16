@@ -18,6 +18,7 @@ import { useCalendarStore } from '../store/calendarStore.js';
 import CalendarToolbar from '../components/CalendarToolbar.jsx';
 import CalendarGrid from '../components/CalendarGrid.jsx';
 import QuickCreateForm from '../components/QuickCreateForm.jsx';
+import ConfirmDialog from '../components/ConfirmDialog.jsx';
 
 /**
  * CalendarPage — top-level calendar route component.
@@ -48,6 +49,13 @@ function CalendarPage() {
    * @type {[{ date: Date, hour: number|null }|null, Function]}
    */
   const [quickCreate, setQuickCreate] = useState(null);
+
+  /**
+   * ID of the event pending confirmation before deletion.
+   * Null when no deletion is in progress.
+   * @type {[number|null, Function]}
+   */
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   /** Fetch the current window on first mount. */
   useEffect(() => {
@@ -106,13 +114,26 @@ function CalendarPage() {
 
   /**
    * Handle delete triggered from an event chip.
-   * Delegates to the store action.
+   * Opens a confirmation dialog before deleting.
    *
    * @param {number} eventId - ID of the event to delete.
    * @returns {void}
    */
   function handleEventDelete(eventId) {
-    deleteEvent(eventId);
+    setPendingDeleteId(eventId);
+  }
+
+  /** Confirm the pending chip-level event deletion. */
+  function handleConfirmDelete() {
+    if (pendingDeleteId != null) {
+      deleteEvent(pendingDeleteId);
+      setPendingDeleteId(null);
+    }
+  }
+
+  /** Cancel the pending chip-level event deletion. */
+  function handleCancelDelete() {
+    setPendingDeleteId(null);
   }
 
   /**
@@ -237,6 +258,12 @@ function CalendarPage() {
           )}
         </div>
       )}
+      <ConfirmDialog
+        isOpen={pendingDeleteId != null}
+        message="Delete this event? This cannot be undone."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+      />
     </div>
   );
 }
