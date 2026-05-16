@@ -159,6 +159,10 @@ vi.mock('../../client/src/pages/SearchPage.jsx', () => ({
   default: () => <div data-testid="search-page">SearchPage</div>,
 }));
 
+vi.mock('../../client/src/pages/dashboard-page.jsx', () => ({
+  default: () => <div data-testid="dashboard-page">DashboardPage</div>,
+}));
+
 vi.mock('../../client/src/components/TopNavbar.jsx', () => ({
   default: () => <div data-testid="top-navbar">TopNavbar</div>,
 }));
@@ -277,11 +281,10 @@ describe('App routing', () => {
     expect(screen.getByTestId('contact-detail-page')).toBeInTheDocument();
   });
 
-  it('redirects / to /contacts via Navigate', () => {
+  it('renders DashboardPage at /', () => {
     setPath('/');
     render(<App />);
-    const nav = screen.getByTestId('navigate');
-    expect(nav).toHaveAttribute('data-to', '/contacts');
+    expect(screen.getByTestId('dashboard-page')).toBeInTheDocument();
   });
 
   it('renders NotesPage at /notes', () => {

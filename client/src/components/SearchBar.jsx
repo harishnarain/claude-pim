@@ -40,6 +40,9 @@ function SearchBar() {
   /** Ref to the wrapper div used for click-outside detection. */
   const wrapperRef = useRef(null);
 
+  /** Ref to the element that was focused before the search bar opened, for Escape restoration. */
+  const previousFocusRef = useRef(null);
+
   /**
    * Close the dropdown when the user clicks outside the wrapper div.
    */
@@ -86,12 +89,14 @@ function SearchBar() {
   }
 
   /**
-   * Handle input focus: open the dropdown so recent searches are visible
-   * when the query is empty.
+   * Handle input focus: capture the previously focused element (for Escape
+   * restoration) and open the dropdown so recent searches are visible.
    *
+   * @param {React.FocusEvent<HTMLInputElement>} e - The focus event.
    * @returns {void}
    */
-  function handleFocus() {
+  function handleFocus(e) {
+    previousFocusRef.current = e.relatedTarget;
     openDropdown();
   }
 
@@ -112,6 +117,10 @@ function SearchBar() {
     } else if (e.key === 'Escape') {
       closeDropdown();
       e.currentTarget.blur();
+      if (previousFocusRef.current) {
+        previousFocusRef.current.focus();
+        previousFocusRef.current = null;
+      }
     }
   }
 

@@ -25,6 +25,7 @@ const mockNavigate = vi.fn();
 
 vi.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
+  useLocation: () => ({ state: null }),
 }));
 
 /** Mutable store state — reset in beforeEach. */

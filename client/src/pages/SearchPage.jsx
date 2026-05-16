@@ -52,6 +52,7 @@ function SearchPage() {
 
   const isLoading = useSearchStore((s) => s.isLoading);
   const results = useSearchStore((s) => s.results);
+  const total = useSearchStore((s) => s.total);
   const { search, setQuery } = useSearchStore.getState();
 
   /**
@@ -131,11 +132,13 @@ function SearchPage() {
 
       {q.length > 0 && (
         <>
-          {/* Result count */}
+          {/* Result count — use store.total (server count) on All tab, filtered length on type tabs */}
           {!isLoading && (
             <p className="mb-4 text-sm text-gray-500">
-              {filteredResults.length}{' '}
-              {filteredResults.length === 1 ? 'result' : 'results'}
+              {(() => {
+                const count = type != null ? filteredResults.length : total;
+                return `${count} ${count === 1 ? 'result' : 'results'}`;
+              })()}
             </p>
           )}
 

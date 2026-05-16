@@ -4,6 +4,7 @@
  * the persistent Sidebar navigation and top navbar.
  *
  * Routes:
+ *   /                      → DashboardPage (overview dashboard)
  *   /contacts              → ContactsPage (list view)
  *   /contacts/new          → ContactDetailPage in create mode
  *   /contacts/:id          → ContactDetailPage for an existing contact
@@ -18,7 +19,7 @@
  *   /search                → SearchPage (global search results)
  */
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar.jsx';
 import TopNavbar from './components/TopNavbar.jsx';
 import ContactsPage from './pages/ContactsPage.jsx';
@@ -30,6 +31,7 @@ import TaskEditorPage from './pages/TaskEditorPage.jsx';
 import CalendarPage from './pages/CalendarPage.jsx';
 import EventEditorPage from './pages/EventEditorPage.jsx';
 import SearchPage from './pages/SearchPage.jsx';
+import DashboardPage from './pages/dashboard-page.jsx';
 
 /**
  * App — root component wrapping the entire PIM UI.
@@ -47,8 +49,8 @@ function App() {
           <Sidebar />
           <main className="flex-1 overflow-y-auto">
             <Routes>
-              {/* Redirect the root path to /contacts */}
-              <Route path="/" element={<Navigate to="/contacts" replace />} />
+              {/* Dashboard overview */}
+              <Route path="/" element={<DashboardPage />} />
 
               {/* Contacts list view */}
               <Route path="/contacts" element={<ContactsPage />} />

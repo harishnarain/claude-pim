@@ -9,8 +9,8 @@
  *
  * @returns {JSX.Element}
  */
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useContactsStore } from '../store/contactsStore.js';
 import ContactList from '../components/ContactList.jsx';
 import ContactSearch from '../components/ContactSearch.jsx';
@@ -22,6 +22,18 @@ import EmptyState from '../components/EmptyState.jsx';
  */
 function ContactsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [toast, setToast] = useState(null);
+
+  /** Display a toast when redirected here with a state message (e.g. after delete or 404). */
+  useEffect(() => {
+    if (location.state?.toast) {
+      setToast(location.state.toast);
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
+
   const {
     filteredContacts,
     isLoading,
@@ -54,6 +66,16 @@ function ContactsPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      {/* Toast notification (delete-success, 404 redirect) */}
+      {toast && (
+        <div
+          className="mb-4 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800"
+          role="status"
+        >
+          {toast}
+        </div>
+      )}
+
       {/* Page header */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Contacts</h1>

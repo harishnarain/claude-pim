@@ -17,6 +17,27 @@ import { NavLink } from 'react-router-dom';
  */
 const NAV_LINKS = [
   {
+    label: 'Dashboard',
+    to: '/',
+    end: true,
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        aria-hidden="true"
+        stroke="currentColor"
+        fill="none"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        {/* House outline */}
+        <path d="M2 7L8 2l6 5" />
+        <path d="M3.5 6.5V13.5a.5.5 0 0 0 .5.5h3V10h2v4h3a.5.5 0 0 0 .5-.5V6.5" />
+      </svg>
+    ),
+  },
+  {
     label: 'Contacts',
     to: '/contacts',
     end: true,

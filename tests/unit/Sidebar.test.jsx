@@ -2,7 +2,7 @@
  * Unit tests for client/src/components/Sidebar.jsx.
  *
  * Covers:
- *   - All four nav links (Contacts, Notes, Tasks, Calendar) render.
+ *   - All five nav links (Dashboard, Contacts, Notes, Tasks, Calendar) render.
  *   - Each nav link contains an inline SVG icon.
  *   - The Tasks link is active (highlighted) when the current path is /tasks/*.
  *   - Active link receives the correct Tailwind highlight class.
@@ -98,9 +98,22 @@ describe('Sidebar nav links', () => {
     expect(screen.getByRole('link', { name: /calendar/i })).toBeInTheDocument();
   });
 
-  it('renders exactly four nav links', () => {
+  it('renders a Dashboard link', () => {
     renderSidebar();
-    expect(screen.getAllByRole('link')).toHaveLength(4);
+    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
+  });
+
+  it('Dashboard link href is /', () => {
+    renderSidebar();
+    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute(
+      'href',
+      '/',
+    );
+  });
+
+  it('renders exactly five nav links', () => {
+    renderSidebar();
+    expect(screen.getAllByRole('link')).toHaveLength(5);
   });
 
   it('Contacts link href is /contacts', () => {
@@ -169,7 +182,7 @@ describe('Sidebar SVG icons', () => {
     expect(calendarLink.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('all four links each contain exactly one SVG element', () => {
+  it('all five links each contain exactly one SVG element', () => {
     const { container } = renderSidebar();
     const links = screen.getAllByRole('link');
     links.forEach((link) => {
