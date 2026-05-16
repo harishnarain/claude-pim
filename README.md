@@ -218,6 +218,47 @@ Six months from now you can open any feature folder and understand exactly what 
 
 ---
 
+## Two Supporting Documents
+
+### SKILL.md — Reusable Agent Recipes
+
+**File:** `SKILL.md` (project root)
+
+`SKILL.md` is a library of multi-step recipes that any agent can consult without being told. Where `CLAUDE.md` governs *how* to work (conventions, branch rules, quality gates), `SKILL.md` documents *what steps* to take for specific recurring tasks.
+
+For example, "add a new data entity" is a skill — it always touches a migration, a model, routes, a store, an API client, and tests, always in that order. Writing it down once means you never have to explain it again:
+
+```markdown
+## Skill: Add a New Data Entity
+
+1. Write a migration in db/migrations/
+2. Create a model in server/models/{entity}.js
+3. Create routes in server/routes/{entity}.js
+4. Register routes in server/index.js
+5. Create a Zustand store in client/src/store/{entity}Store.js
+6. Create an API client in client/src/api/{entity}.js
+7. Write unit tests
+8. Write E2E test
+```
+
+Add a new skill whenever an agent asks you the same question twice, or whenever a task spans multiple files in a fixed order. The `start-here/SKILL.md` comes with four built-in skills — extend it as your project grows.
+
+### SDD-workflow-setup.md — The Setup Guide
+
+**File:** `SDD-workflow-setup.md` (project root)
+
+A copy-paste walkthrough for dropping the harness into a blank project from scratch. It covers:
+
+- What each file and folder does
+- How to create the directory structure
+- How to fill in `CLAUDE.md` for your project
+- The phase-gate approval phrases
+- A quick reference card summarising the full pipeline and branch rules
+
+Keep this file in the project root alongside `CLAUDE.md` — it is the onboarding document for any new collaborator (human or AI) who needs to understand the workflow fast.
+
+---
+
 ## How to Use This Harness in Your Own Project
 
 The `start-here/` folder contains everything you need to copy into a blank project.
@@ -227,6 +268,8 @@ The `start-here/` folder contains everything you need to copy into a blank proje
 ```bash
 # In your new project root
 cp path/to/claude-pim/start-here/CLAUDE.md .
+cp path/to/claude-pim/start-here/SKILL.md .
+cp path/to/claude-pim/start-here/SDD-workflow-setup.md .
 cp -r path/to/claude-pim/start-here/.claude .
 mkdir -p .claudedoc
 ```
@@ -236,6 +279,8 @@ The files you are copying:
 ```
 start-here/
 ├── CLAUDE.md                        ← edit this for your project
+├── SKILL.md                         ← reusable agent recipes (extend as you go)
+├── SDD-workflow-setup.md            ← full setup walkthrough and quick-reference card
 └── .claude/
     ├── agents/
     │   ├── requirements.md          ← Requirements Agent role
@@ -401,9 +446,13 @@ Visit `http://localhost:5173` to see the PIM.
 ```
 claude-pim/
 ├── CLAUDE.md                    ← project constitution
+├── SKILL.md                     ← reusable agent recipes
+├── SDD-workflow-setup.md        ← setup walkthrough and quick-reference card
 ├── README.md                    ← you are here
 ├── start-here/                  ← copy into your own project to get started
 │   ├── CLAUDE.md                ← template constitution
+│   ├── SKILL.md                 ← template skill library
+│   ├── SDD-workflow-setup.md    ← setup guide
 │   └── .claude/
 │       ├── agents/              ← five agent role definitions
 │       └── commands/            ← three slash commands
