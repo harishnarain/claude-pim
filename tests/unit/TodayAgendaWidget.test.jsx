@@ -59,7 +59,7 @@ function makeEvent(overrides = {}) {
   return {
     id: 1,
     title: 'Team standup',
-    start_at: '2026-05-15T09:30:00',
+    startAt: '2026-05-15T09:30:00',
     location: null,
     ...overrides,
   };
@@ -158,7 +158,7 @@ describe('event rows', () => {
   });
 
   it('renders the formatted start time (HH:MM)', () => {
-    renderWidget([makeEvent({ start_at: '2026-05-15T14:00:00' })]);
+    renderWidget([makeEvent({ startAt: '2026-05-15T14:00:00' })]);
     expect(screen.getByText('14:00')).toBeInTheDocument();
   });
 
@@ -214,7 +214,7 @@ describe('task rows', () => {
 describe('slicing to first 5 items', () => {
   it('renders exactly 5 event rows when 6 events are supplied', () => {
     const events = Array.from({ length: 6 }, (_, i) =>
-      makeEvent({ id: i + 1, title: `Event ${i + 1}`, start_at: `2026-05-15T0${i}:00:00` }),
+      makeEvent({ id: i + 1, title: `Event ${i + 1}`, startAt: `2026-05-15T0${i}:00:00` }),
     );
     renderWidget(events);
     // Event 6 should not appear
@@ -239,7 +239,7 @@ describe('slicing to first 5 items', () => {
 describe('"View all" event link', () => {
   it('does not render when there are exactly 5 events', () => {
     const events = Array.from({ length: 5 }, (_, i) =>
-      makeEvent({ id: i + 1, title: `Event ${i + 1}`, start_at: `2026-05-15T0${i}:00:00` }),
+      makeEvent({ id: i + 1, title: `Event ${i + 1}`, startAt: `2026-05-15T0${i}:00:00` }),
     );
     renderWidget(events);
     // There are links for each row + no extra "View all" link beyond row links
@@ -250,7 +250,7 @@ describe('"View all" event link', () => {
 
   it('renders a "View all" link to /calendar when more than 5 events exist', () => {
     const events = Array.from({ length: 6 }, (_, i) =>
-      makeEvent({ id: i + 1, title: `Event ${i + 1}`, start_at: `2026-05-15T0${i}:00:00` }),
+      makeEvent({ id: i + 1, title: `Event ${i + 1}`, startAt: `2026-05-15T0${i}:00:00` }),
     );
     renderWidget(events);
     const viewAllLink = screen.getByRole('link', { name: 'View all' });

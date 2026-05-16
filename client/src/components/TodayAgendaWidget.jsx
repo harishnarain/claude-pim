@@ -57,7 +57,7 @@ function TodayAgendaWidget({ todayEvents, todayTasks }) {
                   className="flex items-baseline gap-2 rounded px-1 py-0.5 text-sm hover:bg-gray-50"
                 >
                   <span className="w-10 shrink-0 font-mono text-xs text-gray-500">
-                    {formatEventTime(event.start_at)}
+                    {formatEventTime(event.startAt)}
                   </span>
                   <span className="font-medium text-gray-900">{event.title}</span>
                   {event.location && (

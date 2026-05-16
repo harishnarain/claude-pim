@@ -75,16 +75,20 @@ export function useDashboardData() {
   useEffect(() => {
     const todayISO = getTodayISO();
     const plusSevenISO = addDays(todayISO, 7);
+    let cancelled = false;
 
-    setIsLoading(true);
-    setError(null);
+    async function load() {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [tasks, items, notes] = await Promise.all([
+          getTasks(),
+          getEvents({ start: todayISO, end: plusSevenISO }),
+          getNotes(),
+        ]);
 
-    Promise.all([
-      getTasks(),
-      getEvents({ start: todayISO, end: plusSevenISO }),
-      getNotes(),
-    ])
-      .then(([tasks, items, notes]) => {
+        if (cancelled) return;
+
         // ------------------------------------------------------------------
         // todayEvents — events whose date matches today, sorted ascending
         // ------------------------------------------------------------------
@@ -173,13 +177,15 @@ export function useDashboardData() {
 
         setPinnedItemsTotal(pinnedAll.length);
         setPinnedItemsSlice(pinnedAll.slice(0, 6));
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+      } catch (err) {
+        if (!cancelled) setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    }
+
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   return {
